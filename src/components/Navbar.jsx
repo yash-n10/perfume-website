@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Volume2, VolumeX, Sparkles, Crown } from 'lucide-react';
 import { soundscape } from '../utils/audio';
+import logo from '../assets/logo.jpg';
 
 export default function Navbar() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -26,11 +27,14 @@ export default function Navbar() {
           <span className="badge-text">Private Reserve • Edition 01</span>
         </div>
 
-        {/* Center: Brand Typography Wordmark (Logo skipped as per instruction) */}
+        {/* Center: Brand Logo & Typography Wordmark */}
         <div className="brand-wordmark-container">
           <a href="#" className="brand-wordmark">
-            <span className="brand-name gold-shimmer-text">MOHERA</span>
-            <span className="brand-subtext font-poetic">Haute Parfumerie</span>
+            <img src={logo} alt="MOHERA Emblem" className="navbar-logo-img" />
+            <div className="brand-text-col">
+              <span className="brand-name gold-shimmer-text">MOHERA</span>
+              <span className="brand-subtext font-poetic">Haute Parfumerie</span>
+            </div>
           </a>
         </div>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Mail, Globe, ArrowUp, Send } from 'lucide-react';
+import logo from '../assets/logo.jpg';
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -12,7 +13,10 @@ export default function Footer() {
       
       <div className="footer-content">
         <div className="footer-brand-block">
-          <h3 className="footer-brand font-royal gold-shimmer-text">MOHERA</h3>
+          <div className="footer-logo-row">
+            <img src={logo} alt="MOHERA Seal" className="footer-logo-img" />
+            <h3 className="footer-brand font-royal gold-shimmer-text">MOHERA</h3>
+          </div>
           <p className="footer-punchline font-poetic">
             “Your fragrance, your signature.”
           </p>

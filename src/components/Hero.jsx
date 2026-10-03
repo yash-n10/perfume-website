@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { ArrowRight, CheckCircle2, ShieldCheck, Mail, User, Sparkles, Copy, Check } from 'lucide-react';
 import Countdown from './Countdown';
+import logo from '../assets/logo.jpg';
 
 export default function Hero() {
   const [formData, setFormData] = useState({ name: '', email: '' });
@@ -59,6 +60,12 @@ export default function Hero() {
   return (
     <section className="hero-section">
       <div className="hero-content">
+        {/* Official Atelier Crest Logo */}
+        <div className="hero-logo-emblem-wrapper">
+          <div className="hero-emblem-glow"></div>
+          <img src={logo} alt="MOHERA Luxury Seal" className="hero-logo-img" />
+        </div>
+
         {/* Atelier Crest Eyebrow */}
         <div className="hero-eyebrow-wrapper">
           <div className="eyebrow-line"></div>

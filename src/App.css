@@ -111,21 +111,44 @@
 .brand-wordmark {
   text-decoration: none;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 14px;
+  transition: var(--transition-smooth);
+}
+
+.navbar-logo-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-400);
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.35);
+  object-fit: cover;
+  transition: var(--transition-smooth);
+}
+
+.brand-wordmark:hover .navbar-logo-img {
+  transform: rotate(6deg) scale(1.06);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+  border-color: var(--gold-300);
+}
+
+.brand-text-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 2px;
 }
 
 .brand-name {
   font-family: var(--font-serif-royal);
-  font-size: 2.1rem;
+  font-size: 2rem;
   font-weight: 800;
   letter-spacing: 0.28em;
   line-height: 1;
 }
 
 .brand-subtext {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   letter-spacing: 0.22em;
   color: var(--gold-400);
   text-transform: uppercase;
@@ -206,6 +229,43 @@
 /* ==========================================================================
    HERO SECTION
    ========================================================================== */
+.hero-logo-emblem-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.hero-emblem-glow {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.45) 0%, rgba(212, 175, 55, 0.1) 50%, transparent 75%);
+  filter: blur(20px);
+  pointer-events: none;
+  animation: pulseGoldGlow 4s infinite alternate ease-in-out;
+}
+
+.hero-logo-img {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-400);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 25px rgba(212, 175, 55, 0.4);
+  object-fit: cover;
+  transition: var(--transition-smooth);
+}
+
+.hero-logo-img:hover {
+  transform: scale(1.06) rotate(3deg);
+  border-color: var(--gold-300);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), 0 0 35px rgba(212, 175, 55, 0.65);
+}
+
 .hero-eyebrow-wrapper {
   display: flex;
   align-items: center;
@@ -1203,11 +1263,34 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.footer-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.footer-logo-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold-400);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+  object-fit: cover;
+  transition: var(--transition-smooth);
+}
+
+.footer-logo-img:hover {
+  transform: scale(1.08) rotate(5deg);
+  border-color: var(--gold-300);
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.55);
+}
+
 .footer-brand {
   font-size: 2rem;
   font-weight: 900;
   letter-spacing: 0.24em;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 .footer-punchline {
@@ -1330,6 +1413,15 @@
     grid-template-columns: 1fr;
     gap: 60px;
     text-align: center;
+  }
+
+  .hero-logo-emblem-wrapper {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .footer-logo-row {
+    justify-content: center;
   }
 
   .hero-eyebrow-wrapper {
