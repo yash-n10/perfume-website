@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BottleShowcase from './components/BottleShowcase';
+import Collections from './components/Collections';
 import Footer from './components/Footer';
 import './App.css';
 
@@ -57,6 +58,9 @@ export default function App() {
             <BottleShowcase />
           </div>
         </div>
+
+        {/* Collections Showcase with Verified Products */}
+        <Collections />
       </main>
 
       {/* Footer */}
