@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BottleShowcase from './components/BottleShowcase';
-import FragrancePyramid from './components/FragrancePyramid';
-import VIPPerks from './components/VIPPerks';
 import Footer from './components/Footer';
 import './App.css';
 
@@ -11,11 +9,11 @@ export default function App() {
   const [particles, setParticles] = useState([]);
 
   useEffect(() => {
-    const generated = Array.from({ length: 20 }).map((_, i) => ({
+    const generated = Array.from({ length: 18 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
       top: Math.random() * 100,
-      size: Math.random() * 3 + 1,
+      size: Math.random() * 2.5 + 1,
       duration: Math.random() * 10 + 8,
       delay: Math.random() * 4
     }));
@@ -24,7 +22,7 @@ export default function App() {
 
   return (
     <div className="mohera-app">
-      {/* Floating gold dust particles */}
+      {/* Background ambient gold particles */}
       <div className="particles-canvas" aria-hidden="true">
         {particles.map((p) => (
           <div
@@ -42,29 +40,23 @@ export default function App() {
         ))}
       </div>
 
-      {/* Ambient background glow */}
+      {/* Ambient background glows */}
       <div className="ambient-orb orb-1" aria-hidden="true"></div>
       <div className="ambient-orb orb-2" aria-hidden="true"></div>
 
       {/* Navigation */}
       <Navbar />
 
-      <main className="main-content">
-        {/* Hero & Bottle Showcase Section */}
-        <section className="hero-showcase-container">
-          <div className="hero-col">
+      {/* Main Coming Soon Presentation */}
+      <main className="main-content-simple">
+        <div className="coming-soon-layout">
+          <div className="coming-soon-left">
             <Hero />
           </div>
-          <div className="showcase-col">
+          <div className="coming-soon-right">
             <BottleShowcase />
           </div>
-        </section>
-
-        {/* Fragrance Notes */}
-        <FragrancePyramid />
-
-        {/* VIP Benefits */}
-        <VIPPerks />
+        </div>
       </main>
 
       {/* Footer */}
