@@ -1,18 +1,12 @@
-import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, Mail } from 'lucide-react';
+import React from 'react';
+import { ArrowUpRight } from 'lucide-react';
 import Countdown from './Countdown';
 import logo from '../assets/logo.jpg';
 
+// Set your Google Form URL here
+const GOOGLE_FORM_URL = "https://forms.google.com";
+
 export default function Hero() {
-  const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!email || !email.includes('@')) return;
-    setSubmitted(true);
-  };
-
   return (
     <section className="hero-section hero-simple">
       <div className="hero-content">
@@ -40,32 +34,17 @@ export default function Hero() {
         {/* Countdown */}
         <Countdown />
 
-        {/* Minimal Notify Input */}
-        <div className="notify-container">
-          {!submitted ? (
-            <form onSubmit={handleSubmit} className="notify-form">
-              <div className="notify-input-group">
-                <Mail size={16} className="notify-icon" />
-                <input
-                  type="email"
-                  placeholder="Enter your email for launch updates"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="notify-input"
-                />
-              </div>
-              <button type="submit" className="btn-gold notify-btn">
-                <span>Notify Me</span>
-                <ArrowRight size={15} />
-              </button>
-            </form>
-          ) : (
-            <div className="notify-success">
-              <CheckCircle2 size={18} className="gold-icon" />
-              <span>Thank you. We will notify you when we launch.</span>
-            </div>
-          )}
+        {/* Enquiry Button pointing to Google Form */}
+        <div className="enquiry-action-container">
+          <a
+            href={GOOGLE_FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-gold enquiry-hero-btn"
+          >
+            <span>Enquiry</span>
+            <ArrowUpRight size={17} />
+          </a>
         </div>
       </div>
     </section>

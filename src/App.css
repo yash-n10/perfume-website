@@ -82,7 +82,7 @@
   padding: 18px 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .brand-wordmark {
@@ -304,69 +304,56 @@
 }
 
 /* ==========================================================================
-   NOTIFY INPUT
+   ENQUIRY BUTTONS
    ========================================================================== */
-.notify-container {
-  max-width: 460px;
-}
-
-.notify-form {
+.enquiry-action-container {
   display: flex;
-  gap: 10px;
+  margin-top: 10px;
 }
 
-.notify-input-group {
-  position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.notify-icon {
-  position: absolute;
-  left: 14px;
-  color: var(--gold-500);
-  pointer-events: none;
-}
-
-.notify-input {
-  width: 100%;
-  background: rgba(10, 10, 14, 0.85);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  border-radius: 4px;
-  padding: 13px 14px 13px 40px;
-  color: #fff;
-  font-family: var(--font-sans);
+.enquiry-hero-btn {
+  text-decoration: none;
   font-size: 0.88rem;
+  padding: 16px 40px;
+  letter-spacing: 0.22em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 25px rgba(212, 175, 55, 0.4);
+}
+
+.enquiry-hero-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 35px rgba(212, 175, 55, 0.6);
+}
+
+.nav-enquiry-btn {
+  text-decoration: none;
+  font-size: 0.74rem;
+  padding: 8px 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.16em;
+}
+
+.product-enquire-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  font-family: var(--font-serif-royal);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-400);
   transition: var(--transition-smooth);
 }
 
-.notify-input::placeholder {
-  color: #656573;
-}
-
-.notify-input:focus {
-  outline: none;
-  border-color: var(--gold-400);
-  box-shadow: 0 0 20px rgba(212, 175, 55, 0.35);
-  background: rgba(14, 14, 20, 0.95);
-}
-
-.notify-btn {
-  padding: 13px 24px;
-  white-space: nowrap;
-}
-
-.notify-success {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 20px;
-  background: rgba(212, 175, 55, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  border-radius: 6px;
-  font-size: 0.88rem;
+.product-enquire-link:hover {
   color: var(--gold-300);
+  transform: translateX(3px);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
 /* ==========================================================================
@@ -692,20 +679,16 @@
     align-items: center;
   }
 
-  .notify-container {
-    margin-left: auto;
-    margin-right: auto;
+  .enquiry-action-container {
+    justify-content: center;
     width: 100%;
   }
 }
 
 @media (max-width: 560px) {
-  .notify-form {
-    flex-direction: column;
-  }
-
-  .notify-btn {
+  .enquiry-hero-btn {
     width: 100%;
+    justify-content: center;
   }
 
   .countdown-grid {

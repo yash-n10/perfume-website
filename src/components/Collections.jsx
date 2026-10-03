@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ArrowUpRight } from 'lucide-react';
 
 const products = [
   {
@@ -132,6 +132,15 @@ export default function Collections() {
                 <span className="product-status-pill font-royal">
                   Coming Soon
                 </span>
+                <a
+                  href="https://forms.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="product-enquire-link"
+                >
+                  <span>Enquire</span>
+                  <ArrowUpRight size={13} />
+                </a>
               </div>
             </div>
           </div>
