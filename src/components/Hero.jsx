@@ -14,40 +14,24 @@ export default function Hero() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.email || !formData.email.includes('@')) {
-      setError('Please provide a valid VIP correspondence email.');
+      setError('Please enter a valid email address.');
       return;
     }
     setError('');
 
-    // Generate bespoke VIP pass ID
+    // Generate VIP access number
     const randomPass = 'MOH-' + Math.floor(1000 + Math.random() * 9000);
     setPassNumber(randomPass);
     setSubmitted(true);
 
-    // Luxury gold confetti explosion
+    // Subtle gold confetti effect
     try {
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 70,
+        spread: 60,
         origin: { y: 0.6 },
-        colors: ['#D4AF37', '#faebc3', '#aa820a', '#ffffff', '#e5c158']
+        colors: ['#D4AF37', '#faebc3', '#b58d20', '#ffffff', '#e5c158']
       });
-      setTimeout(() => {
-        confetti({
-          particleCount: 40,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: ['#D4AF37', '#e8c766', '#c5a059']
-        });
-        confetti({
-          particleCount: 40,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: ['#D4AF37', '#faebc3', '#8a6712']
-        });
-      }, 250);
     } catch (_) {}
   };
 
@@ -60,55 +44,50 @@ export default function Hero() {
   return (
     <section className="hero-section">
       <div className="hero-content">
-        {/* Official Atelier Crest Logo */}
+        {/* Brand Logo Emblem */}
         <div className="hero-logo-emblem-wrapper">
           <div className="hero-emblem-glow"></div>
-          <img src={logo} alt="MOHERA Luxury Seal" className="hero-logo-img" />
+          <img src={logo} alt="MOHERA Emblem" className="hero-logo-img" />
         </div>
 
-        {/* Atelier Crest Eyebrow */}
+        {/* Eyebrow */}
         <div className="hero-eyebrow-wrapper">
           <div className="eyebrow-line"></div>
-          <span className="hero-eyebrow font-royal">Private Maison Allocation</span>
+          <span className="hero-eyebrow font-royal">Exclusive Pre-Launch</span>
           <div className="eyebrow-line"></div>
         </div>
 
-        {/* Brand Name Title */}
+        {/* Brand Name */}
         <h1 className="hero-title font-royal">
           <span className="gold-gradient-text">MOHERA</span>
         </h1>
 
         {/* Punchline */}
-        <div className="punchline-wrapper">
-          <span className="punchline-quote">“</span>
-          <p className="hero-punchline font-poetic">
-            Your fragrance, your signature.
-          </p>
-          <span className="punchline-quote">”</span>
-        </div>
+        <p className="hero-punchline font-poetic">
+          Your fragrance, your signature.
+        </p>
 
-        {/* Descriptive Manifesto */}
+        {/* Simple English Description */}
         <p className="hero-description">
-          An indelible mark of nocturnal allure and liquid 24-karat gold. Formulated in Grasse 
-          using aged botanical resins, rare damask petals, and velvet woods. 
-          Limited to strictly 500 hand-numbered flacons worldwide for our inaugural revelation.
+          A captivating new fragrance crafted with warm golden amber, dark rose petals, 
+          and smooth vanilla woods. Formulated in small batches to deliver an unforgettable scent that lasts all day.
         </p>
 
         {/* Countdown to Launch */}
         <Countdown />
 
-        {/* VIP Waitlist / Early Access Vault */}
+        {/* Waitlist Box */}
         <div id="waitlist-section" className="waitlist-card-container">
           {!submitted ? (
             <div className="waitlist-box luxury-glass">
               <div className="waitlist-header">
                 <div className="waitlist-title-row">
                   <Sparkles size={18} className="gold-icon" />
-                  <h3 className="waitlist-title font-royal">Request Private Vault Allocation</h3>
+                  <h3 className="waitlist-title font-royal">Get Early Access</h3>
                 </div>
                 <p className="waitlist-subtitle">
-                  Join the confidential guest list for guaranteed allocation of Batch 01, 
-                  complimentary bespoke discovery vials, and private launch invitation.
+                  Be the first to experience MOHERA. Join the waitlist for launch updates, 
+                  early ordering, and a complimentary sample vial.
                 </p>
               </div>
 
@@ -118,7 +97,7 @@ export default function Hero() {
                     <User size={16} className="input-icon" />
                     <input 
                       type="text" 
-                      placeholder="Your Distinguished Name" 
+                      placeholder="Your Name" 
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="luxury-input"
@@ -128,7 +107,7 @@ export default function Hero() {
                     <Mail size={16} className="input-icon" />
                     <input 
                       type="email" 
-                      placeholder="Exclusive Email Address *" 
+                      placeholder="Your Email Address *" 
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -141,7 +120,7 @@ export default function Hero() {
 
                 <div className="form-action-row">
                   <button type="submit" className="btn-gold waitlist-submit-btn">
-                    <span>Reserve Your Signature</span>
+                    <span>Join The Waitlist</span>
                     <ArrowRight size={16} />
                   </button>
                 </div>
@@ -149,42 +128,41 @@ export default function Hero() {
 
               <div className="waitlist-guarantee">
                 <ShieldCheck size={14} className="gold-icon" />
-                <span>Strictly Confidential. Complimentary courier delivery on inaugural orders.</span>
+                <span>We respect your privacy. No spam, only launch updates.</span>
               </div>
             </div>
           ) : (
-            /* VIP Access Pass Confirmation Card */
+            /* Confirmation Pass */
             <div className="vip-pass-card luxury-glass">
               <div className="vip-pass-inner">
                 <div className="vip-badge-row">
-                  <span className="vip-label font-royal">Private Allocation Confirmed</span>
+                  <span className="vip-label font-royal">You're On The List</span>
                   <CheckCircle2 size={20} className="gold-icon" />
                 </div>
 
                 <div className="vip-details">
                   <p className="vip-greeting font-poetic">
-                    Welcome, {formData.name || 'Esteemed Patron'}.
+                    Thank you, {formData.name || 'Friend'}.
                   </p>
                   <p className="vip-text">
-                    Your allocation for <strong>MOHERA Première Edition</strong> has been recorded in the Maison archive.
-                    An encrypted invitation will be dispatched to <strong>{formData.email}</strong> 48 hours prior to public debut.
+                    Your spot is confirmed. We will send an exclusive invitation to <strong>{formData.email}</strong> before our public launch.
                   </p>
                 </div>
 
                 <div className="vip-pass-ticket">
                   <div className="ticket-item">
-                    <span className="ticket-label">Access Pass No.</span>
+                    <span className="ticket-label">Access Code</span>
                     <span className="ticket-value font-royal">{passNumber}</span>
                   </div>
                   <div className="ticket-divider"></div>
                   <div className="ticket-item">
-                    <span className="ticket-label">Tier Status</span>
-                    <span className="ticket-value gold-text">Patron de Honneur</span>
+                    <span className="ticket-label">Priority Status</span>
+                    <span className="ticket-value gold-text">VIP Member</span>
                   </div>
                   <button 
                     onClick={copyPassCode} 
                     className="copy-pass-btn"
-                    title="Copy Pass Number"
+                    title="Copy Code"
                   >
                     {copied ? <Check size={14} className="gold-icon" /> : <Copy size={14} />}
                     <span>{copied ? 'Copied' : 'Copy'}</span>

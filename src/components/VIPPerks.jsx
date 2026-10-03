@@ -1,36 +1,36 @@
 import React from 'react';
-import { Award, Gift, Sparkles, Key } from 'lucide-react';
+import { Award, Gift, Sparkles, Truck } from 'lucide-react';
 
 export default function VIPPerks() {
   const perks = [
     {
       icon: Award,
-      title: "Serialized Allocation",
-      desc: "Guaranteed priority access to one of the strictly 500 numbered flacons in inaugural Batch 01."
+      title: "First Edition Bottle",
+      desc: "Guaranteed bottle from our limited first batch of only 500 pieces."
     },
     {
       icon: Gift,
-      title: "Discovery Miniature",
-      desc: "Receive a complimentary 5ml velvet travel extrait vial with your personalized certificate."
-    },
-    {
-      icon: Key,
-      title: "Private Salon Entry",
-      desc: "Invitation to exclusive pre-launch digital unveiling and private tasting appointments."
+      title: "Free Sample Vial",
+      desc: "Receive a free travel-size sample vial with your pre-launch order."
     },
     {
       icon: Sparkles,
-      title: "Signature Monogramming",
-      desc: "Bespoke 24-karat gold foil calligraphy of your initials on the obsidian cap upon launch."
+      title: "Early Access Pricing",
+      desc: "Special launch day pricing reserved exclusively for waitlist members."
+    },
+    {
+      icon: Truck,
+      title: "Priority Shipping",
+      desc: "Fast, insured courier delivery sent directly to your door."
     }
   ];
 
   return (
     <section className="perks-section">
       <div className="section-header">
-        <span className="section-eyebrow font-royal">Privileges of the Vault</span>
+        <span className="section-eyebrow font-royal">VIP Benefits</span>
         <h2 className="section-title font-royal">
-          The <span className="gold-gradient-text">Private Reserve</span> Experience
+          Why Join The <span className="gold-gradient-text">Waitlist</span>
         </h2>
       </div>
 

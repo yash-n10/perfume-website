@@ -10,10 +10,9 @@ export default function BottleShowcase() {
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    // Subtle luxury tilt
     setRotate({
-      x: -(y / rect.height) * 12,
-      y: (x / rect.width) * 12
+      x: -(y / rect.height) * 10,
+      y: (x / rect.width) * 10
     });
   };
 
@@ -24,7 +23,7 @@ export default function BottleShowcase() {
 
   return (
     <div className="bottle-showcase-container">
-      {/* Background ambient gold aura */}
+      {/* Background ambient gold glow */}
       <div className="bottle-ambient-glow"></div>
 
       <div 
@@ -40,52 +39,52 @@ export default function BottleShowcase() {
             transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
           }}
         >
-          {/* Top tag */}
+          {/* Top badge */}
           <div className="bottle-card-badge">
             <Sparkles size={13} className="gold-icon" />
-            <span>Masterpiece Flacon • Première Release</span>
+            <span>First Edition Bottle</span>
           </div>
 
-          {/* Perfume Bottle Image Display */}
+          {/* Perfume Bottle Image */}
           <div className="bottle-img-wrapper">
             <img 
               src="/mohera_bottle.jpg" 
-              alt="MOHERA Eau de Parfum Luxury Bottle" 
+              alt="MOHERA Luxury Perfume Bottle" 
               className="bottle-img"
               loading="eager"
             />
             <div className="bottle-sheen-overlay"></div>
           </div>
 
-          {/* Bottle Metadata footer inside card */}
+          {/* Bottle Details */}
           <div className="bottle-card-details">
             <div className="bottle-specs-row">
               <div className="spec-item">
-                <span className="spec-label">Volume</span>
-                <span className="spec-value">100ml / 3.4 FL. OZ.</span>
+                <span className="spec-label">Size</span>
+                <span className="spec-value">100ml / 3.4 oz</span>
               </div>
               <div className="spec-divider"></div>
               <div className="spec-item">
-                <span className="spec-label">Concentration</span>
-                <span className="spec-value">Extrait (32% Pure)</span>
+                <span className="spec-label">Strength</span>
+                <span className="spec-value">All-Day Wear</span>
               </div>
               <div className="spec-divider"></div>
               <div className="spec-item">
                 <span className="spec-label">First Run</span>
-                <span className="spec-value">500 Pieces Only</span>
+                <span className="spec-value">500 Bottles</span>
               </div>
             </div>
 
             {/* Feature Pills */}
             <div className="spec-pills">
               <span className="pill">
-                <Droplets size={12} className="gold-icon" /> Pure Maceration
+                <Droplets size={12} className="gold-icon" /> Pure Ingredients
               </span>
               <span className="pill">
-                <Flame size={12} className="gold-icon" /> Smoked Amber Core
+                <Flame size={12} className="gold-icon" /> Warm Amber Core
               </span>
               <span className="pill">
-                <Shield size={12} className="gold-icon" /> Hand-numbered Flacon
+                <Shield size={12} className="gold-icon" /> Limited Edition
               </span>
             </div>
           </div>

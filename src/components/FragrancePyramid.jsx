@@ -7,81 +7,81 @@ export default function FragrancePyramid() {
   const tiers = {
     top: {
       name: 'Top Notes',
-      subname: 'The Luminous Aura',
-      timeframe: 'First 15 — 45 minutes',
+      subname: 'The Opening',
+      timeframe: 'First 30 Minutes',
       icon: Sun,
-      description: 'The golden burst of illumination that commands attention the moment you enter.',
+      description: 'The bright, fresh first impression when you spray the perfume.',
       notes: [
         {
-          name: 'Calabrian Bergamot',
-          type: 'Citrus Luminescence',
-          desc: 'Sun-drenched Mediterranean zest expressed under cold ceramic press.',
+          name: 'Fresh Bergamot',
+          type: 'Citrus',
+          desc: 'A sparkling, uplifting burst of crisp Mediterranean citrus.',
           intensity: 85
         },
         {
-          name: 'Solar Red Saffron',
-          type: 'Spiced Gold',
-          desc: 'Hand-picked Kashmiri red threads imparting warm, metallic opulence.',
+          name: 'Golden Saffron',
+          type: 'Warm Spice',
+          desc: 'Rich red saffron threads adding an elegant, golden warmth.',
           intensity: 75
         },
         {
-          name: 'Pink Peppercorn',
-          type: 'Vibrant Spark',
-          desc: 'Crushed Madagascar berries offering a subtle, electric opening vibrancy.',
+          name: 'Pink Pepper',
+          type: 'Spicy Fresh',
+          desc: 'Lightly crushed berries that bring a modern, lively touch.',
           intensity: 65
         }
       ]
     },
     heart: {
       name: 'Heart Notes',
-      subname: 'The Magnetic Soul',
-      timeframe: 'Hours 2 — 8',
+      subname: 'The Soul of the Scent',
+      timeframe: 'Hours 2 to 8',
       icon: Heart,
-      description: 'The hypnotic center of gravity that defines the intimacy of your signature scent.',
+      description: 'The deeper, rich floral heart that reveals itself as the day unfolds.',
       notes: [
         {
-          name: 'Black Damask Rose',
-          type: 'Velvet Floral',
-          desc: 'Midnight harvest blooms hydro-distilled in copper alembics for deep floral darkness.',
+          name: 'Dark Damask Rose',
+          type: 'Deep Floral',
+          desc: 'Rich, velvet-soft rose petals harvested for deep floral warmth.',
           intensity: 95
         },
         {
-          name: 'Midnight Jasmine Sambac',
-          type: 'Sensual Intoxication',
-          desc: 'Heirloom Grasse jasmine opening only under the nocturnal moonlight.',
+          name: 'Midnight Jasmine',
+          type: 'Sweet Floral',
+          desc: 'Sweet, intoxicating night-blooming white jasmine flowers.',
           intensity: 90
         },
         {
-          name: 'Smoky Frankincense',
-          type: 'Sacred Resin',
-          desc: 'Omani Hojari tear resins delivering ethereal, spiritual incensed whispers.',
+          name: 'Warm Incense',
+          type: 'Smoky Resin',
+          desc: 'A gentle ribbon of smoky incense for mystery and depth.',
           intensity: 80
         }
       ]
     },
     base: {
       name: 'Base Notes',
-      subname: 'The Eternal Signature',
-      timeframe: 'Hours 8 — 24+',
+      subname: 'The Lasting Signature',
+      timeframe: 'All Day & Night',
       icon: Moon,
-      description: 'The indelible trace etched into memory long after your departure.',
+      description: 'The warm, comforting base that lingers on your clothes and skin.',
       notes: [
         {
-          name: 'Obsidian Amber Crystal',
-          type: 'Molten Resin',
-          desc: 'Golden fossilized resin providing lingering honeyed warmth and velvet depth.',
+          name: 'Golden Amber',
+          type: 'Warm Resin',
+          desc: 'Deep honeyed amber crystals giving smooth, luxurious warmth.',
           intensity: 98
         },
         {
-          name: 'Aged Cambodian Oud',
-          type: 'Noble Agarwood',
-          desc: 'Matured for twenty years in dark cedar casks for smoky, leather sophistication.',
+          name: 'Aged Woods',
+          type: 'Precious Wood',
+          desc: 'Rich dark wood that gives the perfume its strength and character.',
           intensity: 94
         },
         {
-          name: 'Bourbon Vanilla Bean',
-          type: 'Gourmand Allure',
-          desc: 'Sun-cured dark orchid pods yielding a smoky, non-sweet balsamic elegance.',
+          name: 'Bourbon Vanilla',
+          type: 'Smooth Vanilla',
+          desc: 'Real dark vanilla beans offering a comforting, non-sweet finish.',
           intensity: 88
         }
       ]
@@ -95,17 +95,17 @@ export default function FragrancePyramid() {
       <div className="section-header">
         <div className="section-eyebrow font-royal">
           <Compass size={14} className="gold-icon" />
-          <span>The Olfactory Architecture</span>
+          <span>The Fragrance Notes</span>
         </div>
         <h2 className="section-title font-royal">
-          The Anatomy of <span className="gold-gradient-text">Your Signature</span>
+          Three Layers of <span className="gold-gradient-text">Your Signature</span>
         </h2>
         <p className="section-subtitle font-poetic">
-          A tri-layered symphony crafted in 32% Extrait de Parfum concentration to evolve on skin across 24 hours.
+          Crafted to evolve smoothly on your skin throughout the day.
         </p>
       </div>
 
-      {/* Tier Selector Pills */}
+      {/* Tier Selector Buttons */}
       <div className="pyramid-tabs">
         {Object.entries(tiers).map(([key, item]) => {
           const IconComponent = item.icon;
@@ -126,7 +126,7 @@ export default function FragrancePyramid() {
         })}
       </div>
 
-      {/* Active Tier Display */}
+      {/* Active Tier Card */}
       <div className="pyramid-display-card luxury-glass">
         <div className="tier-header-bar">
           <div>
@@ -151,10 +151,9 @@ export default function FragrancePyramid() {
               <h4 className="note-name font-royal">{note.name}</h4>
               <p className="note-desc">{note.desc}</p>
               
-              {/* Longevity & Sillage Meter */}
               <div className="note-meter-container">
                 <div className="meter-label-row">
-                  <span>Persistence</span>
+                  <span>Longevity</span>
                   <span className="meter-value">{note.intensity}%</span>
                 </div>
                 <div className="meter-track">

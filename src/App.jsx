@@ -3,30 +3,28 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BottleShowcase from './components/BottleShowcase';
 import FragrancePyramid from './components/FragrancePyramid';
-import ScentQuiz from './components/ScentQuiz';
 import VIPPerks from './components/VIPPerks';
 import Footer from './components/Footer';
 import './App.css';
 
 export default function App() {
-  // Generate random ambient golden particles
   const [particles, setParticles] = useState([]);
 
   useEffect(() => {
-    const generated = Array.from({ length: 24 }).map((_, i) => ({
+    const generated = Array.from({ length: 20 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
       top: Math.random() * 100,
       size: Math.random() * 3 + 1,
-      duration: Math.random() * 12 + 8,
-      delay: Math.random() * 5
+      duration: Math.random() * 10 + 8,
+      delay: Math.random() * 4
     }));
     setParticles(generated);
   }, []);
 
   return (
     <div className="mohera-app">
-      {/* Background Animated Floating Gold Particles */}
+      {/* Floating gold dust particles */}
       <div className="particles-canvas" aria-hidden="true">
         {particles.map((p) => (
           <div
@@ -44,15 +42,15 @@ export default function App() {
         ))}
       </div>
 
-      {/* Atmospheric radial glow orbs */}
+      {/* Ambient background glow */}
       <div className="ambient-orb orb-1" aria-hidden="true"></div>
       <div className="ambient-orb orb-2" aria-hidden="true"></div>
 
-      {/* Luxury Navigation Bar */}
+      {/* Navigation */}
       <Navbar />
 
       <main className="main-content">
-        {/* Hero Section & Bottle Showcase Duo */}
+        {/* Hero & Bottle Showcase Section */}
         <section className="hero-showcase-container">
           <div className="hero-col">
             <Hero />
@@ -62,17 +60,14 @@ export default function App() {
           </div>
         </section>
 
-        {/* The Olfactory Architecture (Fragrance Pyramid) */}
+        {/* Fragrance Notes */}
         <FragrancePyramid />
 
-        {/* Bespoke Scent Persona Quiz */}
-        <ScentQuiz />
-
-        {/* Private Reserve Privileges */}
+        {/* VIP Benefits */}
         <VIPPerks />
       </main>
 
-      {/* Luxury Footer */}
+      {/* Footer */}
       <Footer />
     </div>
   );

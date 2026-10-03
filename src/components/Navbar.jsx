@@ -1,16 +1,8 @@
-import React, { useState } from 'react';
-import { Volume2, VolumeX, Sparkles, Crown } from 'lucide-react';
-import { soundscape } from '../utils/audio';
+import React from 'react';
+import { Sparkles } from 'lucide-react';
 import logo from '../assets/logo.jpg';
 
 export default function Navbar() {
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const handleSoundToggle = () => {
-    const active = soundscape.toggle();
-    setIsPlaying(active);
-  };
-
   const scrollToWaitlist = () => {
     const el = document.getElementById('waitlist-section');
     if (el) {
@@ -21,47 +13,20 @@ export default function Navbar() {
   return (
     <header className="navbar-container">
       <div className="navbar-content">
-        {/* Left: Private Edition Badge */}
-        <div className="navbar-badge">
-          <Crown size={14} className="gold-icon" />
-          <span className="badge-text">Private Reserve • Edition 01</span>
-        </div>
+        {/* Brand Logo & Name */}
+        <a href="#" className="brand-wordmark">
+          <img src={logo} alt="MOHERA Logo" className="navbar-logo-img" />
+          <div className="brand-text-col">
+            <span className="brand-name gold-shimmer-text">MOHERA</span>
+            <span className="brand-subtext">Luxury Perfume</span>
+          </div>
+        </a>
 
-        {/* Center: Brand Logo & Typography Wordmark */}
-        <div className="brand-wordmark-container">
-          <a href="#" className="brand-wordmark">
-            <img src={logo} alt="MOHERA Emblem" className="navbar-logo-img" />
-            <div className="brand-text-col">
-              <span className="brand-name gold-shimmer-text">MOHERA</span>
-              <span className="brand-subtext font-poetic">Haute Parfumerie</span>
-            </div>
-          </a>
-        </div>
-
-        {/* Right: Soundscape toggle & VIP Allocation CTA */}
+        {/* Right Action */}
         <div className="navbar-actions">
-          <button 
-            onClick={handleSoundToggle}
-            className={`sound-toggle-btn ${isPlaying ? 'active' : ''}`}
-            title={isPlaying ? "Mute Ambient Atelier Soundscape" : "Enable Ambient Atelier Soundscape"}
-            aria-label="Toggle ambient atelier soundscape"
-          >
-            {isPlaying ? (
-              <>
-                <Volume2 size={16} className="gold-icon pulse-sound" />
-                <span className="sound-label">Atelier Sound: On</span>
-              </>
-            ) : (
-              <>
-                <VolumeX size={16} className="text-muted-icon" />
-                <span className="sound-label">Atelier Sound</span>
-              </>
-            )}
-          </button>
-
-          <button onClick={scrollToWaitlist} className="btn-outline-gold nav-reserve-btn">
+          <button onClick={scrollToWaitlist} className="btn-gold nav-reserve-btn">
             <Sparkles size={14} />
-            <span>Join Vault</span>
+            <span>Join Waitlist</span>
           </button>
         </div>
       </div>
