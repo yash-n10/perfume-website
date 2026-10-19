@@ -61,13 +61,13 @@ export default function Collections() {
       <div className="section-header">
         <div className="section-eyebrow font-royal">
           <Sparkles size={14} className="gold-icon" />
-          <span>The Fragrance Lineup</span>
+          <span>Premium Fragrances | Eau de Parfum | For Him & Her</span>
         </div>
         <h2 className="section-title font-royal">
-          Our <span className="gold-gradient-text">Collections</span>
+          Explore Our <span className="gold-gradient-text">Collection</span>
         </h2>
         <p className="section-subtitle font-poetic">
-          Discover the distinctive signatures of MOHERA.
+          Discover the art of personal fragrance with MOHERA — a collection created to celebrate individuality, elegance and confidence.
         </p>
       </div>
 
@@ -130,17 +130,24 @@ export default function Collections() {
               
               <div className="product-footer">
                 <span className="product-status-pill font-royal">
-                  Coming Soon
+                  Available Now
                 </span>
-                <a
-                  href="https://forms.google.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="product-enquire-link"
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(
+                      new CustomEvent('mohera-prefill-enquiry', {
+                        detail: { productName: product.name }
+                      })
+                    );
+                    const el = document.getElementById('enquiry-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="product-enquire-link font-royal"
                 >
                   <span>Enquire</span>
                   <ArrowUpRight size={13} />
-                </a>
+                </button>
               </div>
             </div>
           </div>

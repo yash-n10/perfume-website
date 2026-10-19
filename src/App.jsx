@@ -2,7 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BottleShowcase from './components/BottleShowcase';
+import OpenLetter from './components/OpenLetter';
+import BrandPhilosophy from './components/BrandPhilosophy';
 import Collections from './components/Collections';
+import Contact from './components/Contact';
 import Footer from './components/Footer';
 import './App.css';
 
@@ -48,8 +51,9 @@ export default function App() {
       {/* Navigation */}
       <Navbar />
 
-      {/* Main Coming Soon Presentation */}
+      {/* Main Presentation */}
       <main className="main-content-simple">
+        {/* Opening Screen */}
         <div className="coming-soon-layout">
           <div className="coming-soon-left">
             <Hero />
@@ -59,8 +63,17 @@ export default function App() {
           </div>
         </div>
 
+        {/* Div below opening screen: Founder's Open Letter */}
+        <OpenLetter />
+
+        {/* Brand Philosophy: More Than a Fragrance */}
+        <BrandPhilosophy />
+
         {/* Collections Showcase with Verified Products */}
         <Collections />
+
+        {/* Contact Us Section */}
+        <Contact />
       </main>
 
       {/* Footer */}

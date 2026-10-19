@@ -11,7 +11,7 @@ export default function Footer() {
           <span className="footer-brand-title font-royal gold-shimmer-text">MOHERA</span>
         </div>
         <p className="footer-punchline font-poetic">
-          Your fragrance, your signature
+          Your Signature. Your Story.
         </p>
         <p className="footer-copyright">
           © {new Date().getFullYear()} MOHERA. All rights reserved.
