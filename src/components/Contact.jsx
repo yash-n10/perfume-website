@@ -83,7 +83,7 @@ export default function Contact() {
                     rel="noopener noreferrer"
                     className="contact-card-value whatsapp-chat-link font-royal"
                   >
-                    <span>Chat on WhatsApp</span>
+                    <span>Place Order on WhatsApp</span>
                     <ArrowUpRight size={14} />
                   </a>
                 </div>
@@ -96,16 +96,16 @@ export default function Contact() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="whatsapp-qr-link"
-                  title="Click to chat or scan QR code"
+                  title="Click to place order or scan QR code"
                 >
                   <img
                     src="/whatsapp_qr.jpeg"
-                    alt="Scan to Chat on WhatsApp - Mohera Fragrance"
+                    alt="Scan to Place Order on WhatsApp - Mohera Fragrance"
                     className="whatsapp-qr-image"
                   />
                 </a>
                 <p className="whatsapp-qr-hint font-poetic">
-                  Scan code with your phone camera or WhatsApp to chat with us.
+                  Scan code with your phone camera or WhatsApp to place your order.
                 </p>
               </div>
             </div>
