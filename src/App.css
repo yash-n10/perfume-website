@@ -1640,6 +1640,9 @@
   position: relative;
   width: 100%;
   max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: linear-gradient(135deg, rgba(20, 16, 11, 0.95) 0%, rgba(10, 8, 5, 0.98) 100%);
   border: 1px solid rgba(212, 175, 55, 0.45);
   border-radius: 24px;
@@ -1978,6 +1981,11 @@
 /* ==========================================================================
    RESPONSIVE DESIGN
    ========================================================================== */
+/* ==========================================================================
+   RESPONSIVE DESIGN (TABLET & MOBILE OPTIMIZATIONS)
+   ========================================================================== */
+
+/* 1. TABLET & MEDIUM SCREENS (max-width: 992px) */
 @media (max-width: 992px) {
   .navbar-nav-links {
     display: none;
@@ -1992,12 +2000,14 @@
   .navbar-mobile-drawer {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 20px 24px 28px 24px;
+    gap: 4px;
+    padding: 16px 20px 24px 20px;
     background: rgba(14, 12, 10, 0.98);
     border-top: 1px solid rgba(212, 175, 55, 0.2);
     border-bottom: 1px solid rgba(212, 175, 55, 0.2);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    animation: mobileDrawerSlide 0.25s ease-out;
   }
 
   .mobile-nav-link {
@@ -2005,23 +2015,25 @@
     border: none;
     text-align: left;
     color: var(--text-light);
-    font-size: 0.92rem;
-    letter-spacing: 0.18em;
+    font-size: 0.9rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    padding: 10px 0;
+    padding: 12px 0;
     cursor: pointer;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: color 0.2s ease, padding-left 0.2s ease;
   }
 
   .mobile-nav-link:hover, .mobile-auth-link {
     color: var(--gold-300);
+    padding-left: 4px;
   }
 
   .mobile-user-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
+    padding: 12px 0;
     font-size: 0.85rem;
     color: var(--gold-300);
   }
@@ -2030,15 +2042,20 @@
     background: transparent;
     border: 1px solid rgba(248, 113, 113, 0.4);
     color: #f87171;
-    padding: 4px 12px;
+    padding: 5px 14px;
     border-radius: 12px;
     font-size: 0.72rem;
     cursor: pointer;
   }
 
+  .main-content-simple {
+    padding: 36px 20px 70px 20px;
+    gap: 68px;
+  }
+
   .coming-soon-layout {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 44px;
     text-align: center;
   }
 
@@ -2059,7 +2076,7 @@
 
   .philosophy-grid {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
   }
 
   .open-letter-grid {
@@ -2069,6 +2086,11 @@
 
   .contact-grid-container {
     grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 28px;
   }
 
@@ -2078,26 +2100,502 @@
   }
 }
 
-@media (max-width: 560px) {
-  .enquiry-hero-btn,
-  .hero-explore-btn {
-    width: 100%;
+/* 2. MOBILE VIEWPORTS (max-width: 768px) */
+@media (max-width: 768px) {
+  .navbar-simple {
+    padding: 14px 18px;
+  }
+
+  .navbar-logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+  }
+
+  .brand-name {
+    font-size: 1.6rem;
+    letter-spacing: 0.22em;
+  }
+
+  .nav-enquiry-btn {
+    padding: 7px 14px;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    gap: 4px;
+  }
+
+  .hero-title {
+    font-size: clamp(2.4rem, 8vw, 3.8rem);
+    letter-spacing: 0.14em;
+    margin-bottom: 6px;
+  }
+
+  .hero-tagline {
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+
+  .hero-hook {
+    font-size: clamp(0.98rem, 3.2vw, 1.15rem);
+    margin-bottom: 14px;
+  }
+
+  .hero-description {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    max-width: 520px;
+  }
+
+  .hero-meta-pills {
+    padding: 7px 14px;
+    font-size: 0.68rem;
+    gap: 8px;
     justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .bottle-showcase-container {
+    max-width: 360px;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .section-title {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    letter-spacing: 0.1em;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    padding: 0 10px;
   }
 
   .philosophy-card-container {
-    padding: 32px 20px;
+    padding: 36px 22px;
   }
 
   .open-letter-card-wrapper {
-    padding: 24px 18px;
+    padding: 28px 18px;
+  }
+
+  .open-letter-frame-container {
+    max-width: 340px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .letter-story-title {
+    font-size: 1.35rem;
+    line-height: 1.4;
+  }
+
+  .letter-lead-text {
+    font-size: 1.05rem;
   }
 
   .contact-form-column {
-    padding: 24px 18px;
+    padding: 26px 18px;
   }
 
   .auth-modal-card {
     padding: 28px 20px;
+  }
+
+  .open-letter-lightbox-overlay {
+    padding: 12px;
+  }
+
+  .open-letter-lightbox-card {
+    max-height: 92vh;
+    border-radius: 16px;
+  }
+
+  .lightbox-header {
+    padding: 12px 16px;
+  }
+
+  .lightbox-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
+
+  .lightbox-footer {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    padding: 12px 16px;
+  }
+}
+
+/* 3. SMALL PHONES (max-width: 560px) */
+@media (max-width: 560px) {
+  .main-content-simple {
+    padding: 22px 14px 48px 14px;
+    gap: 46px;
+  }
+
+  .navbar-simple {
+    padding: 11px 14px;
+  }
+
+  .brand-wordmark {
+    gap: 9px;
+  }
+
+  .navbar-logo-img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-name {
+    font-size: 1.38rem;
+    letter-spacing: 0.18em;
+  }
+
+  .nav-enquiry-btn {
+    display: none;
+  }
+
+  .luxury-live-badge {
+    padding: 6px 14px;
+    gap: 8px;
+  }
+
+  .live-badge-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+  }
+
+  .live-badge-tag {
+    font-size: 0.62rem;
+  }
+
+  .hero-explore-btn,
+  .hero-enquiry-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+  }
+
+  .hero-actions-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .bottle-showcase-container {
+    max-width: 300px;
+  }
+
+  .bottle-ambient-glow {
+    width: 220px;
+    height: 220px;
+    filter: blur(35px);
+  }
+
+  .philosophy-card-container {
+    padding: 26px 16px;
+    border-radius: 18px;
+  }
+
+  .philosophy-lead {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    margin-bottom: 22px;
+  }
+
+  .philosophy-card {
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  .philosophy-card-icon {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 14px;
+  }
+
+  .philosophy-card-title {
+    font-size: 1.05rem;
+  }
+
+  .philosophy-card-text {
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
+
+  .philosophy-quote {
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+  }
+
+  .open-letter-card-wrapper {
+    padding: 20px 14px;
+    border-radius: 18px;
+  }
+
+  .open-letter-frame-container {
+    max-width: 280px;
+  }
+
+  .pillar-item {
+    gap: 10px;
+  }
+
+  .pillar-icon-box {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pillar-title {
+    font-size: 0.88rem;
+  }
+
+  .pillar-desc {
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+
+  .letter-action-row {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .letter-cta-btn,
+  .letter-view-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 13px 18px;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+  }
+
+  .collection-filter-tabs {
+    gap: 6px;
+    margin-bottom: 24px;
+  }
+
+  .filter-tab-btn {
+    padding: 7px 14px;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+  }
+
+  .product-info {
+    padding: 20px 16px;
+  }
+
+  .product-name {
+    font-size: 1.3rem;
+  }
+
+  .product-punchline {
+    font-size: 0.98rem;
+    margin-bottom: 10px;
+  }
+
+  .product-description {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+
+  .product-enquire-link {
+    padding: 7px 12px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 8px;
+  }
+
+  .contact-card {
+    padding: 16px 14px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+
+  .contact-icon-box {
+    width: 40px;
+    height: 40px;
+  }
+
+  .contact-card-label {
+    font-size: 0.68rem;
+  }
+
+  .contact-card-value, .contact-card-text {
+    font-size: 0.88rem;
+  }
+
+  .whatsapp-chat-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 13px 16px;
+    background: linear-gradient(135deg, rgba(37, 211, 102, 0.22) 0%, rgba(18, 140, 126, 0.28) 100%);
+    border: 1px solid rgba(37, 211, 102, 0.55);
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    margin-top: 8px;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.18);
+  }
+
+  .whatsapp-chat-link:hover {
+    transform: none;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.3);
+  }
+
+  .whatsapp-qr-wrapper {
+    padding: 14px 12px;
+  }
+
+  .whatsapp-qr-link {
+    max-width: 155px;
+  }
+
+  .whatsapp-qr-hint {
+    font-size: 0.78rem;
+  }
+
+  .contact-form-column {
+    padding: 22px 14px;
+    border-radius: 18px;
+  }
+
+  .contact-form-title {
+    font-size: 1.15rem;
+  }
+
+  .contact-form-subtitle {
+    font-size: 0.82rem;
+    margin-bottom: 18px;
+  }
+
+  /* 16px input font size prevents iOS Safari automatic zoom-in */
+  .contact-input,
+  .contact-textarea,
+  .auth-input {
+    font-size: 16px;
+    padding: 11px 14px;
+  }
+
+  .contact-submit-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 18px;
+    font-size: 0.84rem;
+    letter-spacing: 0.14em;
+  }
+
+  .auth-modal-card {
+    padding: 24px 16px;
+    border-radius: 18px;
+  }
+
+  .auth-title {
+    font-size: 1.35rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.82rem;
+  }
+
+  .auth-input.has-action-btn {
+    padding-right: 88px;
+  }
+
+  .auth-inline-action-btn {
+    padding: 5px 10px;
+    font-size: 0.68rem;
+  }
+
+  .auth-submit-btn {
+    padding: 13px;
+    font-size: 0.82rem;
+  }
+
+  .auth-otp-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .footer-simple {
+    padding: 28px 16px;
+  }
+
+  .footer-brand-title {
+    font-size: 1.15rem;
+    letter-spacing: 0.18em;
+  }
+
+  .footer-simple .footer-punchline {
+    font-size: 0.98rem;
+  }
+
+  .footer-copyright {
+    font-size: 0.68rem;
+  }
+}
+
+/* 4. ULTRA-COMPACT SCREENS (max-width: 380px) */
+@media (max-width: 380px) {
+  .brand-name {
+    font-size: 1.22rem;
+    letter-spacing: 0.14em;
+  }
+
+  .hero-title {
+    font-size: 2.1rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-tagline {
+    font-size: 1.1rem;
+  }
+
+  .bottle-showcase-container {
+    max-width: 250px;
+  }
+
+  .hero-meta-pills {
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 12px;
+  }
+
+  .hero-meta-sep {
+    display: none;
+  }
+
+  .auth-tabs {
+    gap: 4px;
+  }
+
+  .auth-tab-btn {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+@keyframes mobileDrawerSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

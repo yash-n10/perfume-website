@@ -110,6 +110,13 @@ export default function Navbar() {
             >
               Open Letter
             </button>
+            <button
+              type="button"
+              onClick={() => handleScrollTo('enquiry-section')}
+              className="mobile-nav-link font-royal"
+            >
+              Enquiry
+            </button>
 
             {user ? (
               <div className="mobile-user-row">
