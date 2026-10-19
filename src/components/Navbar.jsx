@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowUpRight, Menu, X, User, LogOut } from 'lucide-react';
-import logo from '../assets/logo.jpg';
+import logoSquare from '../assets/logo_square.jpeg';
 import AuthModal from './AuthModal';
 
 const GOOGLE_FORM_URL = "https://forms.google.com";
@@ -24,7 +24,7 @@ export default function Navbar() {
         <div className="navbar-content navbar-simple">
           {/* Logo & Brand Wordmark */}
           <a href="#" className="brand-wordmark">
-            <img src={logo} alt="MOHERA Logo" className="navbar-logo-img" />
+            <img src={logoSquare} alt="MOHERA Logo" className="navbar-logo-img" />
             <span className="brand-name gold-shimmer-text">MOHERA</span>
           </a>
 

@@ -20,7 +20,7 @@ export default function Hero() {
               <span className="live-jewel-pulse"></span>
               <span className="live-jewel-core"></span>
             </span>
-            <span className="live-badge-label font-royal">NOW LIVE</span>
+            <span className="live-badge-label font-royal">LIVE NOW</span>
             <span className="live-badge-divider"></span>
             <span className="live-badge-tag">FIRST EDITION</span>
           </div>
