@@ -16,6 +16,8 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [regEmail, setRegEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // OTP state
   const [otpSent, setOtpSent] = useState(false);
@@ -61,6 +63,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     setGeneratedOtp('');
     setOtpInput('');
     setIsEmailVerified(false);
+    setConfirmPassword('');
     setResendTimer(0);
   };
 
@@ -119,8 +122,13 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       }, 800);
     } else {
       // Register Mode
-      if (!name || !regEmail || !phone || !regPassword) {
+      if (!name || !regEmail || !phone || !regPassword || !confirmPassword) {
         setStatusMessage({ type: 'error', text: 'Please fill in all registration fields.' });
+        return;
+      }
+
+      if (regPassword !== confirmPassword) {
+        setStatusMessage({ type: 'error', text: 'Passwords do not match. Please verify your confirm password.' });
         return;
       }
 
@@ -399,6 +407,30 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     aria-label="Toggle password visibility"
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* 5. Confirm Password */}
+              <div className="auth-input-group">
+                <label className="auth-label font-royal">Confirm Password</label>
+                <div className="auth-input-wrapper">
+                  <Lock size={16} className="auth-input-icon" />
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    placeholder="Re-enter your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="auth-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="auth-eye-btn"
+                    aria-label="Toggle confirm password visibility"
+                  >
+                    {showConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
               </div>

@@ -7,8 +7,8 @@ export default function BottleShowcase() {
       <div className="bottle-card-simple luxury-glass">
         <div className="bottle-img-wrapper">
           <img 
-            src="/mohera_bottle.jpg" 
-            alt="MOHERA Perfume" 
+            src="/first_image.jpeg" 
+            alt="MOHERA Fragrances Special Offer" 
             className="bottle-img"
             loading="eager"
           />

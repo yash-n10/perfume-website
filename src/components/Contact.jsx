@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, Send, MessageSquare, Check, Sparkles } from 'lucide-react';
+import { Mail, MessageCircle, Send, MessageSquare, Check, Sparkles, ArrowUpRight } from 'lucide-react';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -69,15 +69,45 @@ export default function Contact() {
             </div>
           </div>
 
-          <div className="contact-card luxury-glass">
-            <div className="contact-icon-box">
-              <Phone size={20} className="gold-icon" />
-            </div>
-            <div>
-              <span className="contact-card-label font-royal">Direct Mobile</span>
-              <a href="tel:+919031142434" className="contact-card-value font-royal">
-                +91 9031142434
-              </a>
+          <div className="contact-card whatsapp-card luxury-glass">
+            <div className="whatsapp-card-content">
+              <div className="whatsapp-header-row">
+                <div className="contact-icon-box whatsapp-icon-box">
+                  <MessageCircle size={22} className="whatsapp-icon" />
+                </div>
+                <div>
+                  <span className="contact-card-label font-royal">Contact Us on WhatsApp</span>
+                  <a
+                    href="https://wa.me/919031142434"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="contact-card-value whatsapp-chat-link font-royal"
+                  >
+                    <span>Chat on WhatsApp</span>
+                    <ArrowUpRight size={14} />
+                  </a>
+                </div>
+              </div>
+
+              {/* WhatsApp QR Code */}
+              <div className="whatsapp-qr-wrapper">
+                <a
+                  href="https://wa.me/919031142434"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whatsapp-qr-link"
+                  title="Click to chat or scan QR code"
+                >
+                  <img
+                    src="/whatsapp_qr.jpeg"
+                    alt="Scan to Chat on WhatsApp - Mohera Fragrance"
+                    className="whatsapp-qr-image"
+                  />
+                </a>
+                <p className="whatsapp-qr-hint font-poetic">
+                  Scan code with your phone camera or WhatsApp to chat with us.
+                </p>
+              </div>
             </div>
           </div>
         </div>
