@@ -7,10 +7,15 @@ export default function BottleShowcase() {
       <div className="bottle-card-simple luxury-glass">
         <div className="bottle-img-wrapper">
           <img 
-            src="/first_image.jpeg" 
-            alt="MOHERA Fragrances Special Offer" 
+            src="/poster.jpeg" 
+            alt="MOHERA Fragrances Collection - Elan, Belle, Drive, Titan" 
             className="bottle-img"
             loading="eager"
+            onError={(e) => {
+              if (e.target.src !== '/assets/poster.jpeg') {
+                e.target.src = '/assets/poster.jpeg';
+              }
+            }}
           />
           <div className="bottle-sheen-overlay"></div>
         </div>

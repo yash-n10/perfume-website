@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BottleShowcase from './components/BottleShowcase';
 import OpenLetter from './components/OpenLetter';
+import PersonalNote from './components/PersonalNote';
 import BrandPhilosophy from './components/BrandPhilosophy';
 import Collections from './components/Collections';
 import Contact from './components/Contact';
@@ -65,6 +66,9 @@ export default function App() {
 
         {/* Div below opening screen: Founder's Open Letter */}
         <OpenLetter />
+
+        {/* Founder's Personal Note: DEVINOIRE Parfums */}
+        <PersonalNote />
 
         {/* Brand Philosophy: More Than a Fragrance */}
         <BrandPhilosophy />

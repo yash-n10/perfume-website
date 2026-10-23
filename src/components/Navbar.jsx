@@ -46,6 +46,14 @@ export default function Navbar() {
               Open Letter
             </button>
 
+            <button
+              type="button"
+              onClick={() => handleScrollTo('personal-note')}
+              className="nav-link-btn font-royal"
+            >
+              Personal Note
+            </button>
+
             {user ? (
               <div className="nav-user-pill">
                 <User size={13} className="gold-icon" />
@@ -109,6 +117,13 @@ export default function Navbar() {
               className="mobile-nav-link font-royal"
             >
               Open Letter
+            </button>
+            <button
+              type="button"
+              onClick={() => handleScrollTo('personal-note')}
+              className="mobile-nav-link font-royal"
+            >
+              Personal Note
             </button>
             <button
               type="button"
