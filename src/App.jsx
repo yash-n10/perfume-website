@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import BottleShowcase from './components/BottleShowcase';
-import OpenLetter from './components/OpenLetter';
-import PersonalNote from './components/PersonalNote';
+import FounderNotes from './components/FounderNotes';
 import BrandPhilosophy from './components/BrandPhilosophy';
 import Collections from './components/Collections';
 import Contact from './components/Contact';
@@ -64,11 +63,8 @@ export default function App() {
           </div>
         </div>
 
-        {/* Div below opening screen: Founder's Open Letter */}
-        <OpenLetter />
-
-        {/* Founder's Personal Note: DEVINOIRE Parfums */}
-        <PersonalNote />
+        {/* Founder's Vision: Open Letter & Personal Note Slideshow */}
+        <FounderNotes />
 
         {/* Brand Philosophy: More Than a Fragrance */}
         <BrandPhilosophy />

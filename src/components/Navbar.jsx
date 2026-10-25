@@ -40,18 +40,10 @@ export default function Navbar() {
 
             <button
               type="button"
-              onClick={() => handleScrollTo('open-letter')}
+              onClick={() => handleScrollTo('founder-notes')}
               className="nav-link-btn font-royal"
             >
-              Open Letter
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleScrollTo('personal-note')}
-              className="nav-link-btn font-royal"
-            >
-              Personal Note
+              Founder's Notes
             </button>
 
             {user ? (
@@ -113,17 +105,10 @@ export default function Navbar() {
             </button>
             <button
               type="button"
-              onClick={() => handleScrollTo('open-letter')}
+              onClick={() => handleScrollTo('founder-notes')}
               className="mobile-nav-link font-royal"
             >
-              Open Letter
-            </button>
-            <button
-              type="button"
-              onClick={() => handleScrollTo('personal-note')}
-              className="mobile-nav-link font-royal"
-            >
-              Personal Note
+              Founder's Notes
             </button>
             <button
               type="button"
