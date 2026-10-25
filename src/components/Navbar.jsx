@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowUpRight, Menu, X, User, LogOut } from 'lucide-react';
-import logoSquare from '../assets/logo_square.jpeg';
+import logoSquare from '/logo_transparent.png';
 import AuthModal from './AuthModal';
 
 const GOOGLE_FORM_URL = "https://forms.google.com";

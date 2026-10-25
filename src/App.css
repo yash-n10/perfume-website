@@ -100,7 +100,7 @@
   border: 1px solid rgba(212, 175, 55, 0.45);
   box-shadow: 0 4px 15px rgba(180, 140, 32, 0.18), 0 0 16px rgba(212, 175, 55, 0.2);
   object-fit: cover;
-  background: #f5f1eb;
+  background: transparent;
   transition: var(--transition-smooth);
 }
 
