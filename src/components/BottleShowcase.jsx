@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const posters = [
   {
-    src: '/poster.jpeg',
+    src: '/poster_mohera.jpeg',
     name: 'MOHERA',
     alt: 'MOHERA fragrance collection poster'
   },
