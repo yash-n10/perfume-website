@@ -9,7 +9,7 @@ const products = [
     category: 'female',
     punchline: 'Grace captured in every drop.',
     description: 'Designed for the effortlessly elegant woman, Mohera Belle opens with a soft bouquet of blooming flora wrapped in subtle, creamy sweetness. It strikes a seamless balance between delicate refinement and unforgettable charm, lingering close to the skin like a whispered promise. Perfect for daytime sophistication or intimate evenings, this fragrance embodies quiet confidence and timeless femininity.',
-    image: '/products/belle_new.jpeg'
+    image: '/products/belle_poster.jpeg'
   },
   {
     id: 'elan',
@@ -18,7 +18,7 @@ const products = [
     category: 'female',
     punchline: 'Vivacious. Bold. Unapologetically you.',
     description: 'Mohera Elan is a high-energy fragrance crafted for the woman who commands every room she walks into. Featuring crisp, vibrant top notes that transition into a warm, intoxicating amber heart, it offers an alluring combination of freshness and depth. It is an inspiring scent that amplifies presence, making it the ultimate signature accessory for moments that require poise and flair.',
-    image: '/products/elan_new.jpeg'
+    image: '/products/elan_poster.jpeg'
   },
   {
     id: 'drive',
@@ -27,7 +27,7 @@ const products = [
     category: 'male',
     punchline: 'Fuel your ambition.',
     description: 'Built for the modern man with relentless momentum, Mohera Drive blends sharp citrus zests with rugged, smoky undertones. It mirrors the feeling of an open road at dusk—invigorating, mysterious, and full of raw potential. The crisp top notes instantly awaken the senses before settling into a grounded, woody finish that leaves a lasting impression of focus and determination.',
-    image: '/products/drive_new.jpeg'
+    image: '/products/drive_poster.jpeg'
   },
   {
     id: 'titan',
@@ -36,7 +36,7 @@ const products = [
     category: 'male',
     punchline: 'A presence carved in strength.',
     description: 'Mohera Titan is a commanding fragrance that pairs deep, aromatic woods with rich spices to create an aura of undisputed authority. Rich cedar, dark leather, and subtle warm spices weave together to give it a robust, magnetic depth that demands attention without saying a word. It is tailored for moments when quiet power and timeless masculinity take center stage.',
-    image: '/products/titan_new.jpeg'
+    image: '/products/titan_poster.jpeg'
   },
   {
     id: 'luna',
@@ -45,7 +45,7 @@ const products = [
     category: 'upcoming',
     punchline: 'Grace and allure for unforgettable evenings.',
     description: 'Mohera Luna is a captivating fragrance crafted for the woman who shines effortlessly under any spotlight. Featuring luminous, ethereal top notes that transition into a soft, romantic floral and warm amber heart, it offers an enchanting combination of grace and allure. It is a mesmerizing scent that lingers with quiet confidence, making it the ultimate signature accessory for unforgettable evenings and moments of pure elegance.',
-    image: '/products/luna_new.png',
+    image: '/products/luna_poster.jpeg',
     status: 'Coming Soon'
   }
 ];
