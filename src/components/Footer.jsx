@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '/logo_transparent.png';
+import logo from '/logo_transparent_new.png';
 
 export default function Footer() {
   return (
