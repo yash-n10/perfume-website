@@ -23,12 +23,12 @@ const slidesData = [
   },
   {
     id: 'personal-note',
-    tabLabel: '02. DEVINOIRE — Personal Note',
+    tabLabel: '02. MOHERA — Personal Note',
     badgeText: 'Personal Note',
     frameTag: '"My Fragrance, My Signature."',
     imagePath: '/personal_note.jpeg',
     imageFallback: '/assets/personal_note.jpeg',
-    lightboxTitle: 'DEVINOIRE Parfums — Personal Note',
+    lightboxTitle: 'MOHERA Fragrances — Personal Note',
     lightboxQuote: '"My Fragrance, My Signature."'
   }
 ];
