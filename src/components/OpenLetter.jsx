@@ -124,52 +124,10 @@ export default function OpenLetter() {
             <div className="letter-signature-block">
               <p className="signature-name font-royal gold-gradient-text">Mohita</p>
               <p className="signature-role font-royal">MOHERA Fragrances</p>
-              <p className="signature-role font-royal font-poetic" style={{ marginTop: '0.2rem', color: '#c5a059' }}>
-                My Fragrance, My Signature.
-              </p>
-            </div>
-
-            {/* Product & Availability Details */}
-            <div className="letter-pillars" style={{ marginTop: '1.5rem' }}>
-              <div className="pillar-item">
-                <div className="pillar-icon-box">
-                  <Sparkles size={18} className="gold-icon" />
-                </div>
-                <div>
-                  <h4 className="pillar-title font-royal">The Signature Four</h4>
-                  <p className="pillar-desc">
-                    Introducing <strong>Belle</strong>, <strong>Elan</strong>, <strong>Drive</strong>, and <strong>Titan</strong> — crafted with long-lasting elegance for every occasion.
-                  </p>
-                </div>
-              </div>
-
-              <div className="pillar-item">
-                <div className="pillar-icon-box">
-                  <Sparkles size={18} className="gold-icon" />
-                </div>
-                <div>
-                  <h4 className="pillar-title font-royal">Eight Signature Fragrances</h4>
-                  <p className="pillar-desc">
-                    Featuring <strong>Aphira</strong>, <strong>Hera</strong>, <strong>Nereus</strong>, <strong>Hades</strong>, <strong>Orion</strong>, <strong>Sephora</strong>, <strong>Athena</strong>, and <strong>Ares</strong> — crafted for deeper, more distinct impressions.
-                  </p>
-                </div>
-              </div>
-
-              <div className="pillar-item">
-                <div className="pillar-icon-box">
-                  <Sparkles size={18} className="gold-icon" />
-                </div>
-                <div>
-                  <h4 className="pillar-title font-royal">Made with Passion</h4>
-                  <p className="pillar-desc">
-                    Spread fragrance, positivity, and beautiful stories together. Available online at <strong>www.mohera.in</strong>.
-                  </p>
-                </div>
-              </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="letter-action-row" style={{ marginTop: '1.5rem' }}>
+            <div className="letter-action-row" style={{ marginTop: '2rem' }}>
               <a href="#collections-section" className="btn-gold letter-cta-btn">
                 <span>Explore The Fragrances</span>
                 <ArrowRight size={16} />
