@@ -1,8 +1,7 @@
-export const API_BASE_URL = (
-    import.meta.env.BASE_URL && import.meta.env.BASE_URL.startsWith('http')
-        ? import.meta.env.BASE_URL
-        : import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
-).replace(/\/$/, '');
+import { BACKEND_URL } from './config';
+
+export const API_BASE_URL = BACKEND_URL.replace(/\/$/, '');
+
 
 const AUTH_TOKEN_KEY = 'mohera_access_token';
 
