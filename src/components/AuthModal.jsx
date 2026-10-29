@@ -245,6 +245,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   <input
                     type="email"
                     required
+                    autoComplete="email"
                     placeholder="name@example.com"
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
@@ -269,6 +270,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
+                    autoComplete="current-password"
                     placeholder="••••••••"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
@@ -296,6 +298,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   <input
                     type="text"
                     required
+                    autoComplete="name"
                     placeholder="Enter your full name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -320,6 +323,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   <input
                     type="email"
                     required
+                    autoComplete="email"
                     disabled={isEmailVerified}
                     placeholder="name@example.com"
                     value={regEmail}
@@ -356,7 +360,9 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     <input
                       type="text"
                       inputMode="numeric"
+                      pattern="[0-9]*"
                       maxLength={4}
+                      autoComplete="one-time-code"
                       placeholder="Enter 4-digit OTP"
                       value={otpInput}
                       onChange={(e) => setOtpInput(e.target.value)}
@@ -382,6 +388,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   <input
                     type="tel"
                     required
+                    autoComplete="tel"
                     placeholder="+91 98765 43210"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
@@ -398,6 +405,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
+                    autoComplete="new-password"
                     placeholder="Create a secure password"
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
@@ -422,6 +430,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
+                    autoComplete="new-password"
                     placeholder="Re-enter your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
