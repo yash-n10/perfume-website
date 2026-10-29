@@ -23,7 +23,7 @@ export default function OpenLetter() {
     };
   }, [isOpen]);
 
-  const letterImagePath = "/assets/open_letter.jpeg";
+  const letterImagePath = "/assets/open_letter_final.jpeg";
 
   return (
     <section id="open-letter" className="open-letter-section">
@@ -36,7 +36,7 @@ export default function OpenLetter() {
           An <span className="gold-gradient-text">Open Letter</span>
         </h2>
         <p className="section-subtitle font-poetic">
-          A personal message from founder Mohita Mishra to family, friends, and well-wishers.
+          A personal message from founder Mohita to family, friends, and well-wishers.
         </p>
       </div>
 
@@ -63,13 +63,12 @@ export default function OpenLetter() {
               >
                 <img
                   src={letterImagePath}
-                  alt="An Open Letter from Mohita Mishra - MOHERA Fragrance"
+                  alt="An Open Letter from Mohita - MOHERA Fragrance"
                   className="open-letter-img"
                   loading="lazy"
                   onError={(e) => {
-                    // Fallback if needed
-                    if (e.target.src !== '/open_letter.jpeg') {
-                      e.target.src = '/open_letter.jpeg';
+                    if (e.target.src !== '/open_letter_final.jpeg') {
+                      e.target.src = '/open_letter_final.jpeg';
                     }
                   }}
                 />
@@ -82,7 +81,7 @@ export default function OpenLetter() {
               </div>
 
               <div className="open-letter-frame-footer">
-                <span className="frame-tag font-poetic">"Your Signature. Your Story."</span>
+                <span className="frame-tag font-poetic">"My Fragrance, My Signature."</span>
                 <button
                   type="button"
                   onClick={() => setIsOpen(true)}
@@ -98,27 +97,39 @@ export default function OpenLetter() {
           {/* Narrative Content & Excerpt */}
           <div className="open-letter-content">
             <div className="letter-header-tag font-royal">
-              <span>MOHERA Eau de Parfum</span>
+              <span>MOHERA Fragrances</span>
             </div>
 
             <h3 className="letter-story-title font-royal">
-              "Your purchase means more than just a product — it is your <span className="gold-gradient-text">belief in my dream</span>."
+              "Today, I am thrilled to share a dream very close to my heart – <span className="gold-gradient-text">the launch of MOHERA Fragrance</span>."
             </h3>
 
             <p className="letter-lead-text font-poetic">
-              "Today, I am thrilled to share a dream very close to my heart – the launch of MOHERA Fragrance. This journey is possible because of your love, encouragement and constant support."
+              "Hello to everyone, Today, I am thrilled to share a dream very close to my heart – the launch of MOHERA Fragrance. This journey is possible because of your love, encouragement and constant support."
             </p>
+
+            <div className="letter-narrative-paragraphs">
+              <p className="letter-paragraph font-poetic">
+                "Fragrance has always been a part of my life, and with MOHERA, I wanted to create something special for those who love softer, deeper and long-lasting scents. These fragrances are crafted for individuals who appreciate sweet as well as bold notes, refined ingredients and a touch of luxury in their everyday moments."
+              </p>
+              <p className="letter-paragraph font-poetic">
+                "My love for perfumes gradually transformed into a vision to explore fragrances, understand their character, and thoughtfully select elegant, soft, and captivating scents for modern women and men who value quality, class, and self-expression. MOHERA is more than a fragrance brand; it is a celebration of ambition, elegance, and individuality. Each fragrance is selected to complement the journey of self-made individuals who create their own success and leave a lasting impression wherever they go."
+              </p>
+              <p className="letter-paragraph font-poetic">
+                "My heartfelt gratitude to everyone who believes in my fragrances, my dream, and my initiative. A special thank you to my friend for your constant support and believe in my dreams, my son who is my true friend and greatest strength of my life and my soul sister, her faith and encouragement mean the world to me. You are all a precious part of the MOHERA journey. Thank you and love you all."
+              </p>
+            </div>
 
             {/* Key Pillars from the Letter */}
             <div className="letter-pillars">
               <div className="pillar-item">
                 <div className="pillar-icon-box">
-                  <Heart size={18} className="gold-icon" />
+                  <Sparkles size={18} className="gold-icon" />
                 </div>
                 <div>
-                  <h4 className="pillar-title font-royal">Deep Gratitude</h4>
+                  <h4 className="pillar-title font-royal">The Signature Four</h4>
                   <p className="pillar-desc">
-                    Special thanks to <strong>Dr. Indira Mishra</strong>, my son, my soul sister, and my true friend for standing by me and inspiring strength.
+                    Introducing <strong>Belle</strong>, <strong>Elan</strong>, <strong>Drive</strong>, and <strong>Titan</strong> — crafted with long-lasting elegance for every occasion.
                   </p>
                 </div>
               </div>
@@ -128,9 +139,9 @@ export default function OpenLetter() {
                   <Sparkles size={18} className="gold-icon" />
                 </div>
                 <div>
-                  <h4 className="pillar-title font-royal">The Signature Four</h4>
+                  <h4 className="pillar-title font-royal">Eight Signature Fragrances</h4>
                   <p className="pillar-desc">
-                    Introducing <strong>Belle</strong>, <strong>Elan</strong>, <strong>Drive</strong>, and <strong>Titan</strong> — crafted with long-lasting elegance for every occasion.
+                    Featuring <strong>Aphira</strong>, <strong>Hera</strong>, <strong>Nereus</strong>, <strong>Hades</strong>, <strong>Orion</strong>, <strong>Sephora</strong>, <strong>Athena</strong>, and <strong>Ares</strong> — crafted for deeper, more distinct impressions.
                   </p>
                 </div>
               </div>
@@ -151,8 +162,8 @@ export default function OpenLetter() {
             {/* Founder Sign-off */}
             <div className="letter-signature-block">
               <p className="signature-salutation font-poetic">With gratitude and love,</p>
-              <p className="signature-name font-royal gold-gradient-text">Mohita Mishra</p>
-              <p className="signature-role font-royal">Founder, MOHERA</p>
+              <p className="signature-name font-royal gold-gradient-text">Mohita</p>
+              <p className="signature-role font-royal">MOHERA Fragrances | My Fragrance, My Signature.</p>
             </div>
 
             {/* Action Buttons */}

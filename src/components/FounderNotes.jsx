@@ -23,34 +23,39 @@ const slidesData = [
     titlePrefix: 'An ',
     titleHighlight: 'Open Letter',
     subtitle: 'A personal message from founder Mohita Mishra to family, friends, and well-wishers.',
-    imagePath: '/assets/open_letter.jpeg',
-    imageFallback: '/open_letter.jpeg',
-    frameTag: '"Your Signature. Your Story."',
-    headerTag: 'MOHERA EAU DE PARFUM',
+    imagePath: '/assets/open_letter_final.jpeg',
+    imageFallback: '/open_letter_final.jpeg',
+    frameTag: '"My Fragrance, My Signature."',
+    headerTag: 'MOHERA FRAGRANCE',
     storyTitle: (
       <>
-        "Your purchase means more than just a product — it is your{' '}
-        <span className="gold-gradient-text">belief in my dream</span>."
+        "Today, I am thrilled to share a dream very close to my heart –{' '}
+        <span className="gold-gradient-text">the launch of MOHERA Fragrance</span>."
       </>
     ),
     leadText:
-      '"Today, I am thrilled to share a dream very close to my heart – the launch of MOHERA Fragrance. This journey is possible because of your love, encouragement and constant support."',
+      '"Hello to everyone, Today, I am thrilled to share a dream very close to my heart – the launch of MOHERA Fragrance. This journey is possible because of your love, encouragement and constant support."',
+    narrativeParagraphs: [
+      '"Fragrance has always been a part of my life, and with MOHERA, I wanted to create something special for those who love softer, deeper and long-lasting scents. These fragrances are crafted for individuals who appreciate sweet as well as bold notes, refined ingredients and a touch of luxury in their everyday moments."',
+      '"My love for perfumes gradually transformed into a vision to explore fragrances, understand their character, and thoughtfully select elegant, soft, and captivating scents for modern women and men who value quality, class, and self-expression. MOHERA is more than a fragrance brand; it is a celebration of ambition, elegance, and individuality. Each fragrance is selected to complement the journey of self-made individuals who create their own success and leave a lasting impression wherever they go."',
+      '"My heartfelt gratitude to everyone who believes in my fragrances, my dream, and my initiative. A special thank you to my friend for your constant support and believe in my dreams, my son who is my true friend and greatest strength of my life and my soul sister, her faith and encouragement mean the world to me. You are all a precious part of the MOHERA journey. Thank you and love you all."'
+    ],
     pillars: [
-      {
-        icon: 'heart',
-        title: 'Deep Gratitude',
-        desc: (
-          <>
-            Special thanks to <strong>Dr. Indira Mishra</strong>, my son, my soul sister, and my true friend for standing by me and inspiring strength.
-          </>
-        )
-      },
       {
         icon: 'sparkles',
         title: 'The Signature Four',
         desc: (
           <>
             Introducing <strong>Belle</strong>, <strong>Elan</strong>, <strong>Drive</strong>, and <strong>Titan</strong> — crafted with long-lasting elegance for every occasion.
+          </>
+        )
+      },
+      {
+        icon: 'sparkles',
+        title: 'Eight Signature Fragrances',
+        desc: (
+          <>
+            Featuring <strong>Aphira</strong>, <strong>Hera</strong>, <strong>Nereus</strong>, <strong>Hades</strong>, <strong>Orion</strong>, <strong>Sephora</strong>, <strong>Athena</strong>, and <strong>Ares</strong> — crafted for deeper, more distinct impressions.
           </>
         )
       },
@@ -64,15 +69,16 @@ const slidesData = [
         )
       }
     ],
-    signatureRole: 'Founder, MOHERA',
+    founderName: 'Mohita',
+    signatureRole: 'MOHERA Fragrances | My Fragrance, My Signature.',
     primaryCta: {
       label: 'Explore The Fragrances',
       href: '#collections-section',
       isExternal: false,
       icon: 'arrow'
     },
-    lightboxTitle: 'MOHERA — An Open Letter by Mohita Mishra',
-    lightboxQuote: '"Let\'s spread fragrance, positivity and beautiful stories together."',
+    lightboxTitle: 'MOHERA — An Open Letter by Mohita',
+    lightboxQuote: '"My Fragrance, My Signature."',
     lightboxLink: {
       label: 'View Fragrance Lineup',
       href: '#collections-section',
@@ -88,20 +94,33 @@ const slidesData = [
     eyebrowIcon: 'sparkles',
     titlePrefix: 'A ',
     titleHighlight: 'Personal Note',
-    subtitle: 'Bold fragrances for a distinct you — A personal message from founder Mohita Mishra.',
-    imagePath: '/personal_note.jpeg',
-    imageFallback: '/assets/personal_note.jpeg',
-    frameTag: '"Bold Fragrances for a Distinct You."',
-    headerTag: 'DEVINOIRE PARFUMS',
+    subtitle: 'Softer, deeper, and captivating scents for modern women and men.',
+    imagePath: '/assets/open_letter_final.jpeg',
+    imageFallback: '/open_letter_final.jpeg',
+    frameTag: '"My Fragrance, My Signature."',
+    headerTag: 'MOHERA & DEVINOIRE',
     storyTitle: (
       <>
-        "Scents that speak{' '}
-        <span className="gold-gradient-text">strength, confidence, and individuality</span>."
+        "MOHERA is more than a fragrance brand; it is a{' '}
+        <span className="gold-gradient-text">celebration of ambition, elegance, and individuality</span>."
       </>
     ),
     leadText:
-      '"Fragrance has always been a part of my life, and with DEVINOIRE, I wanted to create something special for those who love stronger, deeper and long-lasting scents. These fragrances are crafted for individuals who appreciate bold notes, refined ingredients and a touch of luxury in their everyday moments."',
+      '"Each fragrance is selected to complement the journey of self-made individuals who create their own success and leave a lasting impression wherever they go."',
+    narrativeParagraphs: [
+      '"My heartfelt gratitude to everyone who believes in my fragrances, my dream, and my initiative."',
+      '"A special thank you to my friend for your constant support and believe in my dreams, my son who is my true friend and greatest strength of my life and my soul sister, her faith and encouragement mean the world to me. You are all a precious part of the MOHERA journey. Thank you and love you all."'
+    ],
     pillars: [
+      {
+        icon: 'sparkles',
+        title: 'The Signature Four',
+        desc: (
+          <>
+            Introducing <strong>Belle</strong>, <strong>Elan</strong>, <strong>Drive</strong>, and <strong>Titan</strong> — crafted with long-lasting elegance for every occasion.
+          </>
+        )
+      },
       {
         icon: 'sparkles',
         title: 'Eight Signature Fragrances',
@@ -112,37 +131,29 @@ const slidesData = [
         )
       },
       {
-        icon: 'heart',
-        title: 'Heartfelt Gratitude',
+        icon: 'check',
+        title: 'Made with Passion',
         desc: (
           <>
-            Heartfelt thanks to <strong>Dr. Indira Mishra</strong> for guiding me, and deepest gratitude to my son, my soul sister, and my true friend for constant encouragement.
-          </>
-        )
-      },
-      {
-        icon: 'chat',
-        title: 'Direct Orders & Inquiries',
-        desc: (
-          <>
-            Order directly via WhatsApp at <strong>+91 9031142434</strong> or visit <strong>www.mohera.in</strong> for online orders.
+            Spread fragrance, positivity, and beautiful stories together. Available online at <strong>www.mohera.in</strong>.
           </>
         )
       }
     ],
-    signatureRole: 'Founder, MOHERA & DEVINOIRE',
+    founderName: 'Mohita',
+    signatureRole: 'MOHERA Fragrances | My Fragrance, My Signature.',
     primaryCta: {
-      label: 'Order via WhatsApp',
-      href: 'https://wa.me/919031142434?text=Hello%20Mohita,%20I%20am%20interested%20in%20the%20DEVINOIRE%20Parfums%20collection.',
-      isExternal: true,
-      icon: 'chat'
+      label: 'Explore The Lineup',
+      href: '#collections-section',
+      isExternal: false,
+      icon: 'arrow'
     },
-    lightboxTitle: 'DEVINOIRE PARFUMS — A Personal Note by Mohita Mishra',
-    lightboxQuote: '"Bold fragrances for a distinct you."',
+    lightboxTitle: 'MOHERA Fragrances — Personal Note by Mohita',
+    lightboxQuote: '"Spread fragrance, positivity, and beautiful stories together."',
     lightboxLink: {
-      label: 'WhatsApp Order: 9031142434',
-      href: 'https://wa.me/919031142434?text=Hello%20Mohita,%20I%20would%20like%20to%20order%20DEVINOIRE%20fragrances.',
-      isExternal: true
+      label: 'Explore Collections',
+      href: '#collections-section',
+      isExternal: false
     }
   }
 ];
@@ -382,6 +393,16 @@ export default function FounderNotes() {
                 {active.leadText}
               </p>
 
+              {active.narrativeParagraphs && (
+                <div className="letter-narrative-paragraphs">
+                  {active.narrativeParagraphs.map((para, pIdx) => (
+                    <p key={pIdx} className="letter-paragraph font-poetic">
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              )}
+
               {/* Key Pillars */}
               <div className="letter-pillars">
                 {active.pillars.map((pillar, i) => (
@@ -403,7 +424,7 @@ export default function FounderNotes() {
               {/* Founder Sign-off */}
               <div className="letter-signature-block">
                 <p className="signature-salutation font-poetic">With gratitude and love,</p>
-                <p className="signature-name font-royal gold-gradient-text">Mohita Mishra</p>
+                <p className="signature-name font-royal gold-gradient-text">{active.founderName || 'Mohita'}</p>
                 <p className="signature-role font-royal">{active.signatureRole}</p>
               </div>
 
