@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowUpRight, Menu, X, User, LogOut } from 'lucide-react';
 import logo from '/logo_white.png';
 import AuthModal from './AuthModal';
+import { api, clearAccessToken, getAccessToken } from '../api';
 
 const GOOGLE_FORM_URL = "https://forms.google.com";
 
@@ -9,6 +10,26 @@ export default function Navbar() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!getAccessToken()) return undefined;
+
+    let isActive = true;
+    api.currentUser()
+      .then((currentUser) => {
+        if (isActive) setUser(currentUser);
+      })
+      .catch(() => clearAccessToken());
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const handleLogout = () => {
+    clearAccessToken();
+    setUser(null);
+  };
 
   const handleScrollTo = (id) => {
     setMobileMenuOpen(false);
@@ -51,7 +72,7 @@ export default function Navbar() {
                 <span className="nav-user-name font-royal">{user.name}</span>
                 <button
                   type="button"
-                  onClick={() => setUser(null)}
+                  onClick={handleLogout}
                   className="nav-logout-btn"
                   title="Logout"
                 >
@@ -123,7 +144,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => {
-                    setUser(null);
+                    handleLogout();
                     setMobileMenuOpen(false);
                   }}
                   className="mobile-logout-btn font-royal"

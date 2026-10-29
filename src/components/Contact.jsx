@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, MessageCircle, Send, MessageSquare, Check, Sparkles, ArrowUpRight } from 'lucide-react';
+import { api } from '../api';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ export default function Contact() {
     enquiry: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
 
   // Listen for prefilled enquiry from fragrance cards
   useEffect(() => {
@@ -24,18 +27,23 @@ export default function Contact() {
     return () => window.removeEventListener('mohera-prefill-enquiry', handlePrefill);
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.phone || !formData.enquiry) {
-      alert('Please fill in all fields (Name, Email, Phone, and Enquiry).');
-      return;
-    }
 
-    setSubmitted(true);
-    setTimeout(() => {
-      setFormData({ name: '', email: '', phone: '', enquiry: '' });
-      setSubmitted(false);
-    }, 5000);
+    setIsSubmitting(true);
+    setSubmissionError('');
+    try {
+      await api.createEnquiry(formData);
+      setSubmitted(true);
+      setTimeout(() => {
+        setFormData({ name: '', email: '', phone: '', enquiry: '' });
+        setSubmitted(false);
+      }, 5000);
+    } catch (error) {
+      setSubmissionError(error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -133,6 +141,7 @@ export default function Contact() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="contact-form">
+              {submissionError && <p className="auth-alert auth-alert-error" role="alert">{submissionError}</p>}
               {/* 1. Name */}
               <div className="contact-input-group">
                 <label className="contact-label font-royal">Name</label>
@@ -185,8 +194,8 @@ export default function Contact() {
                 />
               </div>
 
-              <button type="submit" className="btn-gold contact-submit-btn font-royal">
-                <span>Submit Enquiry</span>
+              <button type="submit" className="btn-gold contact-submit-btn font-royal" disabled={isSubmitting}>
+                <span>{isSubmitting ? 'Submitting...' : 'Submit Enquiry'}</span>
                 <Send size={15} />
               </button>
             </form>

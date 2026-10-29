@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  X, Mail, Lock, User, Phone, ArrowRight, Sparkles, 
-  Check, Eye, EyeOff, KeyRound, CheckCircle2, ShieldCheck 
+import {
+  X, Mail, Lock, User, Phone, ArrowRight, Sparkles,
+  Check, Eye, EyeOff, KeyRound, CheckCircle2
 } from 'lucide-react';
+import { api, setAccessToken } from '../api';
 
 export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
-  
+
   // Login fields
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -21,7 +22,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
   // OTP state
   const [otpSent, setOtpSent] = useState(false);
-  const [generatedOtp, setGeneratedOtp] = useState('');
   const [otpInput, setOtpInput] = useState('');
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -29,6 +29,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   // Common UI state
   const [showPassword, setShowPassword] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Countdown for resending OTP
   useEffect(() => {
@@ -60,7 +61,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const resetForm = () => {
     setStatusMessage(null);
     setOtpSent(false);
-    setGeneratedOtp('');
     setOtpInput('');
     setIsEmailVerified(false);
     setConfirmPassword('');
@@ -70,41 +70,48 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   if (!isOpen) return null;
 
   // Send OTP handler
-  const handleSendOtp = () => {
+  const handleSendOtp = async () => {
     if (!regEmail || !regEmail.includes('@')) {
       setStatusMessage({ type: 'error', text: 'Please enter a valid email address first.' });
       return;
     }
 
-    // Generate 4-digit demo code
-    const code = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(code);
-    setOtpSent(true);
-    setIsEmailVerified(false);
-    setResendTimer(30);
-    setStatusMessage({
-      type: 'success',
-      text: `Verification OTP generated for ${regEmail}.`
-    });
+    setIsSubmitting(true);
+    try {
+      await api.sendOtp(regEmail);
+      setOtpSent(true);
+      setIsEmailVerified(false);
+      setOtpInput('');
+      setResendTimer(60);
+      setStatusMessage({ type: 'success', text: 'Verification code sent to your email.' });
+    } catch (error) {
+      setStatusMessage({ type: 'error', text: error.message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Verify OTP handler
-  const handleVerifyOtp = () => {
-    if (!otpInput) {
-      setStatusMessage({ type: 'error', text: 'Please enter the OTP.' });
+  const handleVerifyOtp = async () => {
+    if (!/^\d{4}$/.test(otpInput.trim())) {
+      setStatusMessage({ type: 'error', text: 'Enter the four-digit code sent to your email.' });
       return;
     }
 
-    if (otpInput.trim() === generatedOtp) {
+    setIsSubmitting(true);
+    try {
+      await api.verifyOtp(regEmail, otpInput.trim());
       setIsEmailVerified(true);
       setStatusMessage({ type: 'success', text: 'Email verified successfully!' });
-    } else {
-      setStatusMessage({ type: 'error', text: 'Invalid OTP. Please check the code and try again.' });
+    } catch (error) {
+      setStatusMessage({ type: 'error', text: error.message });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   // Submit Handler
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (mode === 'login') {
@@ -112,14 +119,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         setStatusMessage({ type: 'error', text: 'Please enter your email and password.' });
         return;
       }
-      const userName = loginEmail.split('@')[0] || 'Member';
-      setStatusMessage({ type: 'success', text: 'Welcome back to MOHERA!' });
-      setTimeout(() => {
-        if (onLoginSuccess) {
-          onLoginSuccess({ name: userName, email: loginEmail });
-        }
-        onClose();
-      }, 800);
     } else {
       // Register Mode
       if (!name || !regEmail || !phone || !regPassword || !confirmPassword) {
@@ -139,29 +138,32 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         });
         return;
       }
+    }
 
+    setIsSubmitting(true);
+    try {
+      const response = mode === 'login'
+        ? await api.login({ email: loginEmail, password: loginPassword })
+        : await api.signup({
+          name,
+          email: regEmail,
+          phone,
+          password: regPassword,
+          confirm_password: confirmPassword,
+        });
+
+      setAccessToken(response.access_token);
       setStatusMessage({
         type: 'success',
-        text: 'Account created successfully! Welcome to MOHERA.'
+        text: mode === 'login' ? 'Welcome back to MOHERA!' : 'Account created successfully! Welcome to MOHERA.',
       });
-
-      setTimeout(() => {
-        if (onLoginSuccess) {
-          onLoginSuccess({ name, email: regEmail, phone });
-        }
-        onClose();
-      }, 900);
+      onLoginSuccess?.(response.user);
+      setTimeout(onClose, 800);
+    } catch (error) {
+      setStatusMessage({ type: 'error', text: error.message });
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    setStatusMessage({ type: 'success', text: 'Signed in as VIP Guest Member.' });
-    setTimeout(() => {
-      if (onLoginSuccess) {
-        onLoginSuccess({ name: 'Guest Member', email: 'guest@mohera.in' });
-      }
-      onClose();
-    }, 600);
   };
 
   return (
@@ -333,11 +335,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   {!isEmailVerified && (
                     <button
                       type="button"
-                      disabled={!regEmail || resendTimer > 0}
+                      disabled={!regEmail || resendTimer > 0 || isSubmitting}
                       onClick={handleSendOtp}
                       className="auth-inline-action-btn font-royal"
                     >
-                      {resendTimer > 0 ? `${resendTimer}s` : otpSent ? 'Resend' : 'Send OTP'}
+                      {isSubmitting ? 'Sending...' : resendTimer > 0 ? `${resendTimer}s` : otpSent ? 'Resend' : 'Send OTP'}
                     </button>
                   )}
                 </div>
@@ -348,13 +350,13 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                 <div className="auth-otp-box">
                   <div className="auth-otp-header">
                     <span className="auth-otp-tip font-poetic">Enter 4-digit code sent to email</span>
-                    <span className="auth-demo-badge">Demo Code: <strong>{generatedOtp}</strong></span>
                   </div>
                   <div className="auth-input-wrapper">
                     <KeyRound size={16} className="auth-input-icon" />
                     <input
                       type="text"
-                      maxLength={6}
+                      inputMode="numeric"
+                      maxLength={4}
                       placeholder="Enter 4-digit OTP"
                       value={otpInput}
                       onChange={(e) => setOtpInput(e.target.value)}
@@ -362,10 +364,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                     />
                     <button
                       type="button"
+                      disabled={isSubmitting}
                       onClick={handleVerifyOtp}
                       className="auth-inline-action-btn auth-verify-btn font-royal"
                     >
-                      Verify OTP
+                      {isSubmitting ? 'Verifying...' : 'Verify OTP'}
                     </button>
                   </div>
                 </div>
@@ -437,25 +440,12 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
             </>
           )}
 
-          <button type="submit" className="btn-gold auth-submit-btn font-royal">
-            <span>{mode === 'login' ? 'Sign In to MOHERA' : 'Register Account'}</span>
+          <button type="submit" className="btn-gold auth-submit-btn font-royal" disabled={isSubmitting}>
+            <span>{isSubmitting ? 'Please wait...' : mode === 'login' ? 'Sign In to MOHERA' : 'Register Account'}</span>
             <ArrowRight size={16} />
           </button>
         </form>
 
-        {/* Demo Fast Sign-in */}
-        <div className="auth-footer-divider">
-          <span>OR</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleDemoLogin}
-          className="btn-outline-gold auth-demo-btn font-royal"
-        >
-          <Sparkles size={14} className="gold-icon" />
-          <span>Continue as Guest / Demo</span>
-        </button>
       </div>
     </div>
   );
