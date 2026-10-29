@@ -1,13 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import { ZoomIn, X, ExternalLink, ArrowRight, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Sparkles,
+  Heart,
+  ZoomIn,
+  X,
+  ExternalLink,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+
+const slidesData = [
+  {
+    id: 'open-letter',
+    tabLabel: '01. MOHERA — Open Letter',
+    badgeText: 'MOHERA Fragrances',
+    frameTag: '"My Fragrance, My Signature."',
+    imagePath: '/assets/open_letter.jpeg',
+    imageFallback: '/open_letter.jpeg',
+    lightboxTitle: 'MOHERA Fragrances — Open Letter',
+    lightboxQuote: '"My Fragrance, My Signature."'
+  },
+  {
+    id: 'personal-note',
+    tabLabel: '02. DEVINOIRE — Personal Note',
+    badgeText: 'Personal Note',
+    frameTag: '"My Fragrance, My Signature."',
+    imagePath: '/personal_note.jpeg',
+    imageFallback: '/assets/personal_note.jpeg',
+    lightboxTitle: 'DEVINOIRE Parfums — Personal Note',
+    lightboxQuote: '"My Fragrance, My Signature."'
+  }
+];
 
 export default function FounderNotes() {
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxSlideIndex, setLightboxSlideIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartXRef = useRef(null);
+
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash === '#personal-note') {
+        setCurrentSlide(1);
+      } else if (hash === '#open-letter') {
+        setCurrentSlide(0);
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setIsLightboxOpen(false);
+      } else if (e.key === 'ArrowLeft' && !isLightboxOpen) {
+        prevSlide();
+      } else if (e.key === 'ArrowRight' && !isLightboxOpen) {
+        nextSlide();
       }
     };
 
@@ -23,18 +77,101 @@ export default function FounderNotes() {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [isLightboxOpen]);
+  }, [isLightboxOpen, currentSlide]);
 
-  const letterImagePath = '/assets/open_letter_final.jpeg';
+  const goToSlide = (index) => {
+    setCurrentSlide(index);
+  };
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slidesData.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slidesData.length) % slidesData.length);
+  };
+
+  const openLightbox = (slideIdx) => {
+    setLightboxSlideIndex(slideIdx);
+    setIsLightboxOpen(true);
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartXRef.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartXRef.current - touchEndX;
+    if (diff > 50) {
+      nextSlide();
+    } else if (diff < -50) {
+      prevSlide();
+    }
+    touchStartXRef.current = null;
+  };
+
+  const active = slidesData[currentSlide];
+  const lightboxItem = slidesData[lightboxSlideIndex];
 
   return (
     <section id="founder-notes" className="founder-notes-section open-letter-section">
       <span id="open-letter" className="section-anchor-shim" aria-hidden="true"></span>
       <span id="personal-note" className="section-anchor-shim" aria-hidden="true"></span>
 
+      {/* Slideshow Switcher */}
+      <div className="section-header" style={{ marginBottom: '1.5rem' }}>
+        <div className="founder-slideshow-nav" role="tablist" aria-label="Founder Notes Navigation">
+          {slidesData.map((slide, idx) => (
+            <button
+              key={slide.id}
+              type="button"
+              role="tab"
+              aria-selected={currentSlide === idx}
+              aria-controls={`slide-panel-${slide.id}`}
+              id={`slide-tab-${slide.id}`}
+              className={`founder-tab-btn font-royal ${currentSlide === idx ? 'active' : ''}`}
+              onClick={() => goToSlide(idx)}
+            >
+              {idx === 0 ? (
+                <Heart size={13} className={currentSlide === idx ? 'fill-gold gold-icon' : ''} />
+              ) : (
+                <Sparkles size={13} className={currentSlide === idx ? 'fill-gold gold-icon' : ''} />
+              )}
+              <span>{slide.tabLabel}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Card Presentation */}
-      <div className="open-letter-card-wrapper luxury-glass founder-slideshow-wrapper">
+      <div
+        className="open-letter-card-wrapper luxury-glass founder-slideshow-wrapper"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
         <div className="open-letter-ambient-glow" aria-hidden="true"></div>
+
+        {/* Floating Arrows */}
+        <button
+          type="button"
+          onClick={prevSlide}
+          className="founder-slide-arrow arrow-left font-royal"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft size={22} />
+        </button>
+        <button
+          type="button"
+          onClick={nextSlide}
+          className="founder-slide-arrow arrow-right font-royal"
+          aria-label="Next slide"
+        >
+          <ChevronRight size={22} />
+        </button>
 
         <div className="open-letter-grid">
           {/* Visual Poster Frame */}
@@ -42,25 +179,25 @@ export default function FounderNotes() {
             <div className="open-letter-frame">
               <div className="open-letter-badge font-royal">
                 <Sparkles size={12} />
-                <span>MOHERA Fragrances</span>
+                <span>{active.badgeText}</span>
               </div>
 
               <div
                 className="open-letter-img-box"
-                onClick={() => setIsLightboxOpen(true)}
+                onClick={() => openLightbox(currentSlide)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setIsLightboxOpen(true)}
-                aria-label="Click to enlarge open letter poster"
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && openLightbox(currentSlide)}
+                aria-label={`Click to enlarge ${active.tabLabel}`}
               >
                 <img
-                  src={letterImagePath}
-                  alt="Open Letter - MOHERA Fragrances"
+                  src={active.imagePath}
+                  alt={active.tabLabel}
                   className="open-letter-img"
                   loading="lazy"
                   onError={(e) => {
-                    if (e.target.src !== '/open_letter_final.jpeg') {
-                      e.target.src = '/open_letter_final.jpeg';
+                    if (e.target.src !== active.imageFallback) {
+                      e.target.src = active.imageFallback;
                     }
                   }}
                 />
@@ -73,10 +210,10 @@ export default function FounderNotes() {
               </div>
 
               <div className="open-letter-frame-footer">
-                <span className="frame-tag font-poetic">"My Fragrance, My Signature."</span>
+                <span className="frame-tag font-poetic">{active.frameTag}</span>
                 <button
                   type="button"
-                  onClick={() => setIsLightboxOpen(true)}
+                  onClick={() => openLightbox(currentSlide)}
                   className="btn-text-gold font-royal frame-zoom-btn"
                 >
                   <ZoomIn size={14} />
@@ -86,7 +223,7 @@ export default function FounderNotes() {
             </div>
           </div>
 
-          {/* Narrative Content - ONLY the exact provided text */}
+          {/* Narrative Content - ONLY the exact given text */}
           <div className="open-letter-content">
             <p className="letter-lead-text font-poetic">
               Hello to everyone ,
@@ -122,7 +259,7 @@ export default function FounderNotes() {
               </p>
 
               <p className="letter-paragraph font-poetic">
-                Thank you and love you all.
+                Thank you  and love you all.
               </p>
             </div>
 
@@ -174,7 +311,7 @@ export default function FounderNotes() {
               </div>
             </div>
 
-            {/* Action Row */}
+            {/* Action Buttons */}
             <div className="letter-action-row" style={{ marginTop: '1.5rem' }}>
               <a href="#collections-section" className="btn-gold letter-cta-btn">
                 <span>Explore The Fragrances</span>
@@ -182,7 +319,7 @@ export default function FounderNotes() {
               </a>
               <button
                 type="button"
-                onClick={() => setIsLightboxOpen(true)}
+                onClick={() => openLightbox(currentSlide)}
                 className="btn-outline-gold letter-view-btn font-royal"
               >
                 <ZoomIn size={15} />
@@ -191,16 +328,58 @@ export default function FounderNotes() {
             </div>
           </div>
         </div>
+
+        {/* Bottom Nav Bar */}
+        <div className="founder-slideshow-bottom">
+          <div className="founder-slide-counter font-royal">
+            <span className="counter-current">0{currentSlide + 1}</span>
+            <span className="counter-divider">/</span>
+            <span className="counter-total">0{slidesData.length}</span>
+          </div>
+
+          <div className="founder-slide-dots" aria-label="Slide indicators">
+            {slidesData.map((_, dotIdx) => (
+              <button
+                key={dotIdx}
+                type="button"
+                onClick={() => goToSlide(dotIdx)}
+                className={`founder-dot-btn ${currentSlide === dotIdx ? 'active' : ''}`}
+                aria-label={`Jump to slide ${dotIdx + 1}`}
+              />
+            ))}
+          </div>
+
+          <div className="founder-slide-quick-nav">
+            <button
+              type="button"
+              onClick={prevSlide}
+              className="founder-bottom-nav-btn font-royal"
+              aria-label="Previous note"
+            >
+              <ChevronLeft size={16} />
+              <span>Previous</span>
+            </button>
+            <button
+              type="button"
+              onClick={nextSlide}
+              className="founder-bottom-nav-btn font-royal"
+              aria-label="Next note"
+            >
+              <span>Next</span>
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Lightbox Modal */}
-      {isLightboxOpen && (
+      {isLightboxOpen && lightboxItem && (
         <div
           className="open-letter-lightbox-overlay"
           onClick={() => setIsLightboxOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="MOHERA Open Letter Poster"
+          aria-label={lightboxItem.lightboxTitle}
         >
           <div
             className="open-letter-lightbox-card"
@@ -209,11 +388,11 @@ export default function FounderNotes() {
             <div className="lightbox-header">
               <div className="lightbox-title font-royal">
                 <Sparkles size={16} className="gold-icon" />
-                <span>MOHERA Fragrances — Open Letter</span>
+                <span>{lightboxItem.lightboxTitle}</span>
               </div>
               <div className="lightbox-actions">
                 <a
-                  href={letterImagePath}
+                  href={lightboxItem.imagePath}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lightbox-icon-btn"
@@ -234,14 +413,14 @@ export default function FounderNotes() {
 
             <div className="lightbox-body">
               <img
-                src={letterImagePath}
-                alt="Open Letter Poster - Mohita"
+                src={lightboxItem.imagePath}
+                alt={lightboxItem.lightboxTitle}
                 className="lightbox-image"
               />
             </div>
 
             <div className="lightbox-footer">
-              <span className="font-poetic">"My Fragrance, My Signature."</span>
+              <span className="font-poetic">{lightboxItem.lightboxQuote}</span>
               <a
                 href="#collections-section"
                 onClick={() => setIsLightboxOpen(false)}
