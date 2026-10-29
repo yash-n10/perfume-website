@@ -51,4 +51,17 @@ export const api = {
     login: (credentials) => request('/api/auth/login', { method: 'POST', body: credentials }),
     currentUser: () => request('/api/auth/me', { authenticated: true }),
     createEnquiry: (details) => request('/api/enquiries', { method: 'POST', body: details }),
+
+    // Admin APIs
+    adminLogin: (credentials) => request('/api/admin/login', { method: 'POST', body: credentials }),
+    getAdminUsers: (token, params = {}) => {
+        const query = new URLSearchParams(params).toString();
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/admin/users${query ? `?${query}` : ''}`, { headers }).then(r => r.json());
+    },
+    getAdminEnquiryReport: (token, params = {}) => {
+        const query = new URLSearchParams(params).toString();
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/admin/enquiries/report${query ? `?${query}` : ''}`, { headers }).then(r => r.json());
+    },
 };
