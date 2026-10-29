@@ -16,8 +16,8 @@ const slidesData = [
     tabLabel: '01. MOHERA — Open Letter',
     badgeText: 'MOHERA Fragrances',
     frameTag: '"My Fragrance, My Signature."',
-    imagePath: '/assets/open_letter.jpeg',
-    imageFallback: '/open_letter.jpeg',
+    imagePath: '/assets/open_letter_final.jpeg',
+    imageFallback: '/open_letter_final.jpeg',
     lightboxTitle: 'MOHERA Fragrances — Open Letter',
     lightboxQuote: '"My Fragrance, My Signature."'
   },
