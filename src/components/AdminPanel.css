@@ -1262,3 +1262,306 @@
     gap: 0.5rem;
   }
 }
+
+/* ========================================================================== */
+/* ORDER SUCCESS & BILL DOWNLOAD CARD                                         */
+/* ========================================================================== */
+
+.order-bill-success-card {
+  max-width: 900px;
+  margin: 0 auto 2rem;
+  background: #ffffff;
+  border: 2px solid var(--gold-border-bright);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 35px rgba(180, 140, 32, 0.15);
+  animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bill-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.8rem;
+  background: linear-gradient(135deg, #181818, #2a261c);
+  border-bottom: 2px solid var(--gold-600);
+}
+
+.bill-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #f7e7ce;
+}
+
+.bill-badge .success-icon {
+  color: #34d399;
+}
+
+.bill-order-number {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gold-400);
+  background: rgba(180, 140, 32, 0.18);
+  padding: 0.35rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--gold-600);
+}
+
+.bill-card-body {
+  padding: 1.75rem 1.8rem;
+}
+
+.bill-customer-name {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 0.35rem;
+}
+
+.bill-details-line {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 1.25rem;
+}
+
+.bill-grand-total-banner {
+  display: inline-block;
+  padding: 0.75rem 1.4rem;
+  background: #faf8f5;
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 1.25rem;
+}
+
+.bill-grand-total-banner span {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gold-700);
+  margin-left: 0.4rem;
+}
+
+.bill-delivery-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.6rem;
+}
+
+.delivery-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+}
+
+.delivery-tag.tag-sent {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.delivery-tag.tag-ready {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.delivery-tag.tag-not-sent {
+  background: #f9fafb;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+}
+
+.bill-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--gold-border);
+}
+
+.btn-bill-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--gold-600), var(--gold-800));
+  border: 1px solid var(--gold-700);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(180, 140, 32, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-bill-download:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-700));
+  box-shadow: 0 6px 18px rgba(180, 140, 32, 0.35);
+}
+
+.btn-bill-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold-800);
+  background: #faf8f5;
+  border: 1px solid var(--gold-border-bright);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-bill-print:hover {
+  background: #ffffff;
+  border-color: var(--gold-600);
+  color: var(--gold-900);
+}
+
+.btn-bill-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-bill-whatsapp:hover {
+  background: #d1fae5;
+  border-color: #34d399;
+}
+
+.btn-bill-new {
+  margin-left: auto;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-bill-new:hover {
+  color: var(--text-dark);
+  background: #f3f4f6;
+}
+
+/* ========================================================================== */
+/* USER FETCH & NOTIFICATION CONTROLS                                         */
+/* ========================================================================== */
+
+.order-user-fetch-box {
+  background: #faf8f5;
+  border: 1px solid var(--gold-border-bright);
+  border-radius: 10px;
+  padding: 1.1rem 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.fetch-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.fetch-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gold-800);
+}
+
+.fetch-select-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fetch-user-select {
+  flex: 1;
+}
+
+.admin-clear-user-btn {
+  padding: 0.7rem 1.1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: #ffffff;
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.admin-clear-user-btn:hover {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.order-notification-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.5rem 0;
+}
+
+.order-notification-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.84rem;
+  color: var(--text-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+.order-notification-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gold-600);
+  cursor: pointer;
+}
+
+.order-notification-checkbox .checkbox-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}

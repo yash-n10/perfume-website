@@ -29,8 +29,12 @@ import {
   Edit,
   ToggleLeft,
   ToggleRight,
+  FileText,
+  Printer,
+  ExternalLink,
 } from 'lucide-react';
 import { api } from '../api';
+import { downloadInvoicePDF, printInvoice } from '../utils/invoiceGenerator';
 import logo from '/logo_white.png';
 import './AdminPanel.css';
 
@@ -49,6 +53,7 @@ const EMPTY_ORDER_ITEM = { product_name: '', quantity: 1, unit_price: '', total_
 const EMPTY_ORDER = {
   customer_name: '', phone: '', email: '', address: '',
   order_type: 'offline', payment_mode: 'Cash', payment_status: 'success', paid_status: 1,
+  send_email: true, send_whatsapp: true,
   items: [{ ...EMPTY_ORDER_ITEM }],
 };
 const EMPTY_PRODUCT = { product_name: '', price: '', image: '', description: '', status: 'active' };
@@ -83,11 +88,14 @@ export default function AdminPanel() {
   const [productSuccess,  setProductSuccess]  = useState('');
   const [editingProduct,  setEditingProduct]  = useState(null); // null = adding new
 
-  // Order form
-  const [orderForm,    setOrderForm]    = useState({ ...EMPTY_ORDER, items: [{ ...EMPTY_ORDER_ITEM }] });
-  const [orderSaving,  setOrderSaving]  = useState(false);
-  const [orderError,   setOrderError]   = useState('');
-  const [orderSuccess, setOrderSuccess] = useState('');
+  // Order form & Bill PDF
+  const [orderForm,         setOrderForm]         = useState({ ...EMPTY_ORDER, items: [{ ...EMPTY_ORDER_ITEM }] });
+  const [orderSaving,       setOrderSaving]       = useState(false);
+  const [orderError,        setOrderError]        = useState('');
+  const [orderSuccess,      setOrderSuccess]      = useState('');
+  const [selectedUserId,    setSelectedUserId]    = useState('');
+  const [lastCreatedOrder,  setLastCreatedOrder]  = useState(null);
+  const [pdfGenerating,     setPdfGenerating]     = useState(false);
 
   // ─── auth ─────────────────────────────────────────────────────────────────
   const handleLogout = useCallback(() => {
@@ -138,8 +146,12 @@ export default function AdminPanel() {
         const data = await api.listProducts();
         setProducts(Array.isArray(data) ? data : []);
       } else if (activeTab === 'orders') {
-        const data = await api.listProducts('active');
-        if (Array.isArray(data)) setProducts(data);
+        const [pdata, udata] = await Promise.all([
+          api.listProducts('active'),
+          api.getAdminUsers(token).catch(() => []),
+        ]);
+        if (Array.isArray(pdata)) setProducts(pdata);
+        if (Array.isArray(udata)) setUsers(udata);
       }
     } catch (err) {
       if (err.message?.toLowerCase().includes('401') || err.message?.toLowerCase().includes('token')) {
@@ -154,7 +166,7 @@ export default function AdminPanel() {
 
   useEffect(() => { if (token) fetchDashboardData(); }, [token, activeTab, fetchDashboardData]);
 
-  // Pre-fetch count stats on initial auth
+  // Pre-fetch count stats and user directory on initial auth
   useEffect(() => {
     if (!token) return;
     api.listProducts().then(d => { if (Array.isArray(d)) setProducts(d); }).catch(() => {});
@@ -304,6 +316,22 @@ export default function AdminPanel() {
     }
   };
 
+  // ─── user selection for order ─────────────────────────────────────────────
+  const handleSelectUser = (userId) => {
+    setSelectedUserId(userId);
+    if (!userId) return;
+    const user = users.find(u => String(u.id) === String(userId));
+    if (user) {
+      setOrderForm(prev => ({
+        ...prev,
+        customer_name: user.name || prev.customer_name,
+        phone: user.phone || prev.phone,
+        email: user.email || prev.email,
+        address: prev.address || 'Registered Customer Address',
+      }));
+    }
+  };
+
   // ─── order form handlers ──────────────────────────────────────────────────
   const updateOrderItem = (index, field, value) => {
     setOrderForm(prev => {
@@ -367,6 +395,8 @@ export default function AdminPanel() {
         payment_mode: orderForm.payment_mode,
         payment_status: orderForm.payment_status,
         paid_status: parseInt(orderForm.paid_status),
+        send_email: Boolean(orderForm.send_email),
+        send_whatsapp: Boolean(orderForm.send_whatsapp),
         items: orderForm.items.map(i => ({
           product_name: i.product_name.trim(),
           quantity: parseInt(i.quantity) || 1,
@@ -374,13 +404,28 @@ export default function AdminPanel() {
           total_price: parseFloat(i.total_price) || 0,
         })),
       };
+
       const result = await api.createOrder(payload);
-      setOrderSuccess(`Order #${result.id} created successfully for ${result.customer_name}! Grand Total: ₹${result.total_price}`);
+      setLastCreatedOrder(result);
+      setOrderSuccess(`Order #${result.id} created successfully for ${result.customer_name}! Grand Total: ₹${Number(result.total_price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`);
       setOrderForm({ ...EMPTY_ORDER, items: [{ ...EMPTY_ORDER_ITEM }] });
+      setSelectedUserId('');
     } catch (err) {
       setOrderError(err.message || 'Failed to create order.');
     } finally {
       setOrderSaving(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!lastCreatedOrder) return;
+    setPdfGenerating(true);
+    try {
+      await downloadInvoicePDF(lastCreatedOrder, lastCreatedOrder.gst_number || '27AABCM1234F1Z1');
+    } catch (err) {
+      alert(`Could not generate PDF: ${err.message}`);
+    } finally {
+      setPdfGenerating(false);
     }
   };
 
@@ -815,6 +860,87 @@ export default function AdminPanel() {
             {/* ════════════════════ CREATE ORDER TAB ════════════════════ */}
             {activeTab === 'orders' && (
               <div className="admin-order-form-wrapper">
+
+                {/* Bill Created Success Banner with PDF Download */}
+                {lastCreatedOrder && (
+                  <div className="order-bill-success-card">
+                    <div className="bill-card-top">
+                      <div className="bill-badge font-royal">
+                        <CheckCircle2 size={18} className="success-icon" />
+                        ORDER CREATED & BILL READY
+                      </div>
+                      <span className="bill-order-number font-royal">#MOH-ORD-{lastCreatedOrder.id}</span>
+                    </div>
+
+                    <div className="bill-card-body">
+                      <h3 className="bill-customer-name font-royal">{lastCreatedOrder.customer_name}</h3>
+                      <p className="bill-details-line">
+                        Phone: <strong>{lastCreatedOrder.phone}</strong> | Email: <strong>{lastCreatedOrder.email || '—'}</strong> | Payment: <strong>{lastCreatedOrder.payment_mode} ({lastCreatedOrder.payment_status})</strong>
+                      </p>
+                      <div className="bill-grand-total-banner font-royal">
+                        Total Amount: <span>₹{Number(lastCreatedOrder.total_price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                      </div>
+
+                      {/* Delivery Status Tags */}
+                      <div className="bill-delivery-tags">
+                        <span className={`delivery-tag ${lastCreatedOrder.email_sent ? 'tag-sent' : 'tag-not-sent'}`}>
+                          <Mail size={13} />
+                          {lastCreatedOrder.email_sent ? 'Receipt Sent to Email' : 'Email Receipt Queued / Skipped'}
+                        </span>
+
+                        <span className={`delivery-tag ${lastCreatedOrder.whatsapp_sent ? 'tag-sent' : 'tag-ready'}`}>
+                          <MessageSquare size={13} />
+                          {lastCreatedOrder.whatsapp_sent ? 'Receipt Sent to WhatsApp' : 'WhatsApp Receipt Ready'}
+                        </span>
+                      </div>
+
+                      {/* Action Buttons for PDF, Print, WhatsApp */}
+                      <div className="bill-action-buttons">
+                        <button
+                          type="button"
+                          className="btn-bill-download font-royal"
+                          onClick={handleDownloadPDF}
+                          disabled={pdfGenerating}
+                        >
+                          <Download size={16} />
+                          <span>{pdfGenerating ? 'Generating PDF...' : 'Download Invoice (PDF)'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          className="btn-bill-print font-royal"
+                          onClick={() => printInvoice(lastCreatedOrder, lastCreatedOrder.gst_number || '27AABCM1234F1Z1')}
+                        >
+                          <Printer size={16} />
+                          <span>Print Bill</span>
+                        </button>
+
+                        {lastCreatedOrder.whatsapp_url && (
+                          <a
+                            href={lastCreatedOrder.whatsapp_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-bill-whatsapp font-royal"
+                            title="Open chat in WhatsApp Web with prefilled invoice message"
+                          >
+                            <MessageSquare size={16} />
+                            <span>Send on WhatsApp</span>
+                            <ExternalLink size={13} />
+                          </a>
+                        )}
+
+                        <button
+                          type="button"
+                          className="btn-bill-new font-royal"
+                          onClick={() => setLastCreatedOrder(null)}
+                        >
+                          + Create Another Order
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="admin-form-card admin-order-card">
                   <div className="admin-dash-header">
                     <div className="admin-title-group">
@@ -832,13 +958,48 @@ export default function AdminPanel() {
                     </div>
                   )}
 
-                  {orderSuccess && (
+                  {orderSuccess && !lastCreatedOrder && (
                     <div className="admin-alert-success" role="status">
                       <CheckCircle2 size={15} /><span>{orderSuccess}</span>
                     </div>
                   )}
 
                   <form onSubmit={handleOrderSubmit} className="admin-order-form">
+
+                    {/* Quick Fill from Registered Users Table */}
+                    <div className="order-user-fetch-box">
+                      <div className="fetch-label-row">
+                        <Users size={15} className="gold-icon" />
+                        <span className="font-royal fetch-title">Fetch Customer from Users Table:</span>
+                      </div>
+                      <div className="fetch-select-row">
+                        <select
+                          className="admin-select fetch-user-select"
+                          value={selectedUserId}
+                          onChange={e => handleSelectUser(e.target.value)}
+                        >
+                          <option value="">-- Choose registered customer (or enter walk-in below) --</option>
+                          {users.map(u => (
+                            <option key={u.id} value={u.id}>
+                              #{u.id} - {u.name} ({u.phone}) - {u.email}
+                            </option>
+                          ))}
+                        </select>
+                        {selectedUserId && (
+                          <button
+                            type="button"
+                            className="admin-clear-user-btn font-royal"
+                            onClick={() => {
+                              setSelectedUserId('');
+                              setOrderForm(p => ({ ...p, customer_name: '', phone: '', email: '', address: '' }));
+                            }}
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Customer Info */}
                     <fieldset className="order-fieldset">
                       <legend className="font-royal order-legend">Customer Details</legend>
@@ -855,7 +1016,7 @@ export default function AdminPanel() {
                           />
                         </div>
                         <div className="admin-field-group">
-                          <label className="admin-field-label font-royal">Phone Number *</label>
+                          <label className="admin-field-label font-royal">Phone Number (WhatsApp) *</label>
                           <input
                             type="tel"
                             className="admin-plain-input"
@@ -897,7 +1058,7 @@ export default function AdminPanel() {
                         <textarea
                           className="admin-textarea"
                           rows={2}
-                          placeholder="Complete address with city & pincode"
+                          placeholder="Complete address with city & pincode (or Walk-in store counter)"
                           value={orderForm.address}
                           onChange={e => setOrderForm(p => ({ ...p, address: e.target.value }))}
                           required
@@ -1035,10 +1196,40 @@ export default function AdminPanel() {
                       </div>
                     </fieldset>
 
+                    {/* Receipt & Notifications */}
+                    <fieldset className="order-fieldset">
+                      <legend className="font-royal order-legend">Receipt & Notifications</legend>
+                      <div className="order-notification-options">
+                        <label className="order-notification-checkbox font-royal">
+                          <input
+                            type="checkbox"
+                            checked={orderForm.send_email}
+                            onChange={e => setOrderForm(p => ({ ...p, send_email: e.target.checked }))}
+                          />
+                          <span className="checkbox-indicator" />
+                          <span className="checkbox-text">
+                            <Mail size={15} className="gold-icon" /> Send Tax Invoice to Customer Email {orderForm.email ? `(${orderForm.email})` : ''}
+                          </span>
+                        </label>
+
+                        <label className="order-notification-checkbox font-royal">
+                          <input
+                            type="checkbox"
+                            checked={orderForm.send_whatsapp}
+                            onChange={e => setOrderForm(p => ({ ...p, send_whatsapp: e.target.checked }))}
+                          />
+                          <span className="checkbox-indicator" />
+                          <span className="checkbox-text">
+                            <MessageSquare size={15} className="gold-icon" /> Send Bill Receipt via WhatsApp {orderForm.phone ? `(${orderForm.phone})` : ''}
+                          </span>
+                        </label>
+                      </div>
+                    </fieldset>
+
                     <button type="submit" disabled={orderSaving} className="admin-submit-btn font-royal order-submit-btn">
                       {orderSaving
-                        ? <span className="admin-btn-content"><RefreshCw size={16} className="spin-icon" /> Creating Order...</span>
-                        : <span className="admin-btn-content"><ShoppingCart size={16} /> Place Order Now</span>}
+                        ? <span className="admin-btn-content"><RefreshCw size={16} className="spin-icon" /> Creating Order & Bill...</span>
+                        : <span className="admin-btn-content"><ShoppingCart size={16} /> Place Order & Generate Bill</span>}
                     </button>
                   </form>
                 </div>
