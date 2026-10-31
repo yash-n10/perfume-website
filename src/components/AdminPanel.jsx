@@ -32,6 +32,8 @@ import {
   FileText,
   Printer,
   ExternalLink,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { api } from '../api';
 import { downloadInvoicePDF, printInvoice } from '../utils/invoiceGenerator';
@@ -43,10 +45,11 @@ const ADMIN_USER_KEY = 'mohera_admin_username';
 
 // ─── Navbar Sections ─────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  { key: 'enquiries', label: 'Enquiries',    Icon: MessageSquare },
-  { key: 'users',     label: 'Customers',    Icon: Users },
-  { key: 'products',  label: 'Products',     Icon: Package },
-  { key: 'orders',    label: 'Create Order', Icon: ShoppingCart },
+  { key: 'orders',       label: 'Orders Report',  Icon: FileText },
+  { key: 'create-order', label: 'Create Order',   Icon: ShoppingCart },
+  { key: 'products',     label: 'Products',       Icon: Package },
+  { key: 'enquiries',    label: 'Enquiries',      Icon: MessageSquare },
+  { key: 'users',        label: 'Customers',      Icon: Users },
 ];
 
 const EMPTY_ORDER_ITEM = { product_name: '', quantity: 1, unit_price: '', total_price: 0 };
@@ -70,7 +73,8 @@ export default function AdminPanel() {
   const [loginError,   setLoginError]     = useState('');
 
   // Dashboard
-  const [activeTab,    setActiveTab]    = useState('products');
+  const [activeTab,    setActiveTab]    = useState('orders');
+  const [orders,       setOrders]       = useState([]);
   const [users,        setUsers]        = useState([]);
   const [enquiries,    setEnquiries]    = useState([]);
   const [products,     setProducts]     = useState([]);
@@ -78,7 +82,9 @@ export default function AdminPanel() {
   const [dataError,    setDataError]    = useState('');
   const [searchTerm,   setSearchTerm]   = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter,   setTypeFilter]   = useState('');
   const [updatingId,   setUpdatingId]   = useState(null);
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   // Product form
   const [showProductForm, setShowProductForm] = useState(false);
@@ -86,7 +92,7 @@ export default function AdminPanel() {
   const [productSaving,   setProductSaving]   = useState(false);
   const [productError,    setProductError]    = useState('');
   const [productSuccess,  setProductSuccess]  = useState('');
-  const [editingProduct,  setEditingProduct]  = useState(null); // null = adding new
+  const [editingProduct,  setEditingProduct]  = useState(null);
 
   // Order form & Bill PDF
   const [orderForm,         setOrderForm]         = useState({ ...EMPTY_ORDER, items: [{ ...EMPTY_ORDER_ITEM }] });
@@ -101,7 +107,7 @@ export default function AdminPanel() {
     setToken(''); setAdminUsername('');
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     localStorage.removeItem(ADMIN_USER_KEY);
-    setUsers([]); setEnquiries([]); setProducts([]);
+    setOrders([]); setUsers([]); setEnquiries([]); setProducts([]);
   }, []);
 
   const handleLogin = async (e) => {
@@ -134,7 +140,17 @@ export default function AdminPanel() {
     if (!token) return;
     setDataLoading(true); setDataError('');
     try {
-      if (activeTab === 'users') {
+      if (activeTab === 'orders') {
+        const params = {};
+        if (statusFilter) params.status = statusFilter;
+        if (typeFilter) params.order_type = typeFilter;
+        if (searchTerm) params.search = searchTerm;
+        const data = await api.listOrders(token, params);
+        setOrders(Array.isArray(data) ? data : []);
+      } else if (activeTab === 'create-order') {
+        const pdata = await api.listProducts('active');
+        if (Array.isArray(pdata)) setProducts(pdata);
+      } else if (activeTab === 'users') {
         const data = await api.getAdminUsers(token);
         setUsers(Array.isArray(data) ? data : []);
       } else if (activeTab === 'enquiries') {
@@ -144,13 +160,6 @@ export default function AdminPanel() {
       } else if (activeTab === 'products') {
         const data = await api.listProducts();
         setProducts(Array.isArray(data) ? data : []);
-      } else if (activeTab === 'orders') {
-        const [pdata, udata] = await Promise.all([
-          api.listProducts('active'),
-          api.getAdminUsers(token).catch(() => []),
-        ]);
-        if (Array.isArray(pdata)) setProducts(pdata);
-        if (Array.isArray(udata)) setUsers(udata);
       }
     } catch (err) {
       if (err.message?.toLowerCase().includes('401') || err.message?.toLowerCase().includes('token')) {
@@ -161,17 +170,50 @@ export default function AdminPanel() {
     } finally {
       setDataLoading(false);
     }
-  }, [token, activeTab, statusFilter, handleLogout]);
+  }, [token, activeTab, statusFilter, typeFilter, searchTerm, handleLogout]);
 
   useEffect(() => { if (token) fetchDashboardData(); }, [token, activeTab, fetchDashboardData]);
 
-  // Pre-fetch count stats and user directory on initial auth
+  // Pre-fetch count stats on initial auth
   useEffect(() => {
     if (!token) return;
+    api.listOrders(token).then(d => { if (Array.isArray(d)) setOrders(d); }).catch(() => {});
     api.listProducts().then(d => { if (Array.isArray(d)) setProducts(d); }).catch(() => {});
     api.getAdminEnquiryReport(token).then(d => { if (Array.isArray(d)) setEnquiries(d); }).catch(() => {});
     api.getAdminUsers(token).then(d => { if (Array.isArray(d)) setUsers(d); }).catch(() => {});
   }, [token]);
+
+  // ─── order status update ──────────────────────────────────────────────────
+  const handleOrderStatusUpdate = async (orderId, newStatus) => {
+    if (!token) return;
+    setUpdatingId(orderId);
+    try {
+      const updated = await api.updateOrderStatus(token, orderId, { payment_status: newStatus });
+      if (updated?.id) {
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, payment_status: updated.payment_status } : o));
+      }
+    } catch (err) {
+      alert(`Could not update order status: ${err.message}`);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const handlePaidStatusToggle = async (order) => {
+    if (!token) return;
+    const newPaidStatus = order.paid_status === 1 ? 0 : 1;
+    setUpdatingId(order.id);
+    try {
+      const updated = await api.updateOrderStatus(token, order.id, { paid_status: newPaidStatus });
+      if (updated?.id) {
+        setOrders(prev => prev.map(o => o.id === order.id ? { ...o, paid_status: updated.paid_status } : o));
+      }
+    } catch (err) {
+      alert(`Could not toggle paid status: ${err.message}`);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   // ─── enquiry status ───────────────────────────────────────────────────────
   const handleStatusChange = async (enquiryId, newStatus) => {
@@ -187,8 +229,32 @@ export default function AdminPanel() {
     }
   };
 
-  // ─── CSV export ───────────────────────────────────────────────────────────
-  const exportToCSV = () => {
+  // ─── CSV exports ──────────────────────────────────────────────────────────
+  const exportOrdersToCSV = () => {
+    if (!orders.length) return;
+    const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Email', 'Order Type', 'Items Breakdown', 'Total Amount (INR)', 'Payment Mode', 'Payment Status', 'Paid Status', 'Address'];
+    const rows = orders.map(o => [
+      `"#MOH-ORD-${o.id}"`,
+      `"${o.order_datetime ? new Date(o.order_datetime).toISOString() : ''}"`,
+      `"${(o.customer_name || '').replace(/"/g, '""')}"`,
+      `"${(o.phone || '').replace(/"/g, '""')}"`,
+      `"${(o.email || '').replace(/"/g, '""')}"`,
+      `"${o.order_type || 'offline'}"`,
+      `"${(o.items || []).map(i => `${i.product_name} (x${i.quantity} @ ₹${i.unit_price})`).join('; ').replace(/"/g, '""')}"`,
+      o.total_price || 0,
+      `"${o.payment_mode || ''}"`,
+      `"${o.payment_status || ''}"`,
+      o.paid_status === 1 ? 'PAID' : 'UNPAID',
+      `"${(o.address || '').replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const link = document.createElement('a');
+    link.setAttribute('href', encodeURI(csvContent));
+    link.setAttribute('download', `mohera_orders_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+  };
+
+  const exportEnquiriesToCSV = () => {
     if (!enquiries.length) return;
     const headers = ['ID', 'Customer Name', 'Email', 'Phone', 'Status', 'Date', 'Enquiry Message'];
     const rows = enquiries.map(item => [
@@ -207,8 +273,18 @@ export default function AdminPanel() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
-  // ─── KPI ─────────────────────────────────────────────────────────────────
-  const metrics = useMemo(() => {
+  // ─── KPI Metrics ──────────────────────────────────────────────────────────
+  const orderMetrics = useMemo(() => {
+    const totalOrders = orders.length;
+    const totalRevenue = orders
+      .filter(o => o.payment_status === 'success' || o.paid_status === 1)
+      .reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
+    const paidCount = orders.filter(o => o.paid_status === 1 || o.payment_status === 'success').length;
+    const pendingCount = orders.filter(o => o.payment_status === 'pending' || o.paid_status === 0).length;
+    return { totalOrders, totalRevenue, paidCount, pendingCount };
+  }, [orders]);
+
+  const enquiryMetrics = useMemo(() => {
     const total = enquiries.length;
     const newCount = enquiries.filter(e => !e.status || e.status === 'new' || e.status === 'pending').length;
     const inProgressCount = enquiries.filter(e => e.status === 'in_progress' || e.status === 'in_review').length;
@@ -217,6 +293,19 @@ export default function AdminPanel() {
   }, [enquiries]);
 
   // ─── filtered views ───────────────────────────────────────────────────────
+  const filteredOrders = useMemo(() => {
+    return orders.filter(o => {
+      const matchesSearch = !searchTerm ||
+        (o.customer_name && o.customer_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (o.phone && o.phone.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (o.email && o.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        String(o.id).includes(searchTerm);
+      const matchesStatus = !statusFilter || o.payment_status === statusFilter;
+      const matchesType = !typeFilter || o.order_type === typeFilter;
+      return matchesSearch && matchesStatus && matchesType;
+    });
+  }, [orders, searchTerm, statusFilter, typeFilter]);
+
   const filteredUsers = users.filter(u => {
     if (!searchTerm) return true;
     const t = searchTerm.toLowerCase();
@@ -390,6 +479,7 @@ export default function AdminPanel() {
 
       const result = await api.createOrder(payload);
       setLastCreatedOrder(result);
+      setOrders(prev => [result, ...prev]);
       setOrderSuccess(`Order #${result.id} created successfully for ${result.customer_name}! Grand Total: ₹${Number(result.total_price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`);
       setOrderForm({ ...EMPTY_ORDER, items: [{ ...EMPTY_ORDER_ITEM }] });
     } catch (err) {
@@ -399,11 +489,12 @@ export default function AdminPanel() {
     }
   };
 
-  const handleDownloadPDF = async () => {
-    if (!lastCreatedOrder) return;
+  const handleDownloadPDF = async (orderToDownload = null) => {
+    const targetOrder = orderToDownload || lastCreatedOrder;
+    if (!targetOrder) return;
     setPdfGenerating(true);
     try {
-      await downloadInvoicePDF(lastCreatedOrder, lastCreatedOrder.gst_number || '27AABCM1234F1Z1');
+      await downloadInvoicePDF(targetOrder, targetOrder.gst_number || '27AABCM1234F1Z1');
     } catch (err) {
       alert(`Could not generate PDF: ${err.message}`);
     } finally {
@@ -417,7 +508,7 @@ export default function AdminPanel() {
       <div className="admin-bg-orb orb-top" aria-hidden="true" />
       <div className="admin-bg-orb orb-bottom" aria-hidden="true" />
 
-      {/* ── Header (No Storefront option) ── */}
+      {/* ── Header ── */}
       <header className="admin-header">
         <div className="admin-brand">
           <img src={logo} alt="MOHERA" className="admin-logo-img" />
@@ -450,19 +541,23 @@ export default function AdminPanel() {
                   setActiveTab(key);
                   setSearchTerm('');
                   setStatusFilter('');
+                  setTypeFilter('');
                   setDataError('');
                 }}
               >
                 <Icon size={16} />
                 <span>{label}</span>
+                {key === 'orders' && orders.length > 0 && (
+                  <span className="admin-nav-count">{orders.length}</span>
+                )}
+                {key === 'products' && products.length > 0 && (
+                  <span className="admin-nav-count">{products.length}</span>
+                )}
                 {key === 'enquiries' && enquiries.length > 0 && (
                   <span className="admin-nav-count">{enquiries.length}</span>
                 )}
                 {key === 'users' && users.length > 0 && (
                   <span className="admin-nav-count">{users.length}</span>
-                )}
-                {key === 'products' && products.length > 0 && (
-                  <span className="admin-nav-count">{products.length}</span>
                 )}
               </button>
             ))}
@@ -529,44 +624,78 @@ export default function AdminPanel() {
           /* ── DASHBOARD VIEW ── */
           <div className="admin-content-area">
 
-            {/* ════════════════════ PRODUCTS TAB ════════════════════ */}
-            {activeTab === 'products' && (
-              <div className="admin-products-view">
-                {/* Actions & Filter Bar */}
+            {/* ════════════════════ ORDERS REPORT TAB ════════════════════ */}
+            {activeTab === 'orders' && (
+              <div className="admin-orders-report-view">
+                {/* Sales & Orders KPI Ribbon */}
+                <div className="order-metrics-grid">
+                  <div className="metric-card metric-revenue">
+                    <div className="metric-header">
+                      <span className="metric-title font-royal">Total Revenue</span>
+                      <IndianRupee size={17} className="gold-icon" />
+                    </div>
+                    <div className="metric-value font-royal">
+                      ₹{orderMetrics.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </div>
+                    <span className="metric-subtext">Settled & paid orders</span>
+                  </div>
+
+                  <div className="metric-card">
+                    <div className="metric-header">
+                      <span className="metric-title font-royal">Total Orders</span>
+                      <FileText size={17} className="gold-icon" />
+                    </div>
+                    <div className="metric-value font-royal">{orderMetrics.totalOrders}</div>
+                    <span className="metric-subtext">All bookings & sales</span>
+                  </div>
+
+                  <div className="metric-card metric-status-resolved">
+                    <div className="metric-header">
+                      <span className="metric-title font-royal">Paid / Settled</span>
+                      <CheckCircle2 size={17} className="status-icon-resolved" />
+                    </div>
+                    <div className="metric-value font-royal">{orderMetrics.paidCount}</div>
+                    <span className="metric-subtext">Completed payments</span>
+                  </div>
+
+                  <div className="metric-card metric-status-new">
+                    <div className="metric-header">
+                      <span className="metric-title font-royal">Pending / Unpaid</span>
+                      <Clock size={17} className="status-icon-pending" />
+                    </div>
+                    <div className="metric-value font-royal">{orderMetrics.pendingCount}</div>
+                    <span className="metric-subtext">Requires settlement</span>
+                  </div>
+                </div>
+
+                {/* Dashboard Controls */}
                 <div className="admin-dash-header">
                   <div className="admin-title-group">
                     <h2 className="admin-section-heading font-royal">
-                      <Package size={20} className="gold-icon" />
-                      Product Catalogue
+                      <FileText size={20} className="gold-icon" />
+                      Orders & Invoices Report
                     </h2>
-                    <span className="admin-section-subtext">Manage luxury perfumes, prices, stock statuses, and descriptions</span>
+                    <span className="admin-section-subtext">
+                      Track sales, view line item breakdowns, update payment statuses, and download GST tax invoices
+                    </span>
                   </div>
 
                   <div className="admin-controls">
                     <button
                       type="button"
                       className="admin-add-product-toggle-btn font-royal"
-                      onClick={() => {
-                        if (showProductForm && !editingProduct) {
-                          setShowProductForm(false);
-                        } else {
-                          setEditingProduct(null);
-                          setProductForm({ ...EMPTY_PRODUCT });
-                          setShowProductForm(true);
-                        }
-                        setProductError('');
-                        setProductSuccess('');
-                      }}
+                      onClick={() => setActiveTab('create-order')}
+                      title="Create a new order"
                     >
                       <Plus size={16} />
-                      <span>{showProductForm && !editingProduct ? 'Close Form' : 'Add Product'}</span>
+                      <span>Create Order</span>
                     </button>
 
                     <div className="admin-search-box">
                       <Search size={15} className="admin-search-icon" />
                       <input
                         type="text"
-                        placeholder="Search products..."
+                        placeholder="Search orders, phone, customer..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         className="admin-search-input"
@@ -577,19 +706,44 @@ export default function AdminPanel() {
                       value={statusFilter}
                       onChange={e => setStatusFilter(e.target.value)}
                       className="admin-select"
-                      aria-label="Filter products by status"
+                      aria-label="Filter by payment status"
                     >
-                      <option value="">All Statuses</option>
-                      <option value="active">Active Only</option>
-                      <option value="inactive">Inactive Only</option>
+                      <option value="">All Payment Statuses</option>
+                      <option value="success">Success / Paid</option>
+                      <option value="pending">Pending</option>
+                      <option value="failed">Failed</option>
+                      <option value="cancelled">Cancelled</option>
                     </select>
+
+                    <select
+                      value={typeFilter}
+                      onChange={e => setTypeFilter(e.target.value)}
+                      className="admin-select"
+                      aria-label="Filter by order type"
+                    >
+                      <option value="">All Order Types</option>
+                      <option value="offline">Offline (In-Store)</option>
+                      <option value="phone">Phone / WhatsApp</option>
+                      <option value="online">Online</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={exportOrdersToCSV}
+                      disabled={orders.length === 0}
+                      className="admin-action-btn font-royal"
+                      title="Export Orders Report to CSV"
+                    >
+                      <Download size={14} />
+                      <span>Export CSV</span>
+                    </button>
 
                     <button
                       type="button"
                       onClick={fetchDashboardData}
                       disabled={dataLoading}
                       className="admin-refresh-btn"
-                      title="Refresh product list"
+                      title="Refresh orders list"
                     >
                       <RefreshCw size={16} className={dataLoading ? 'spin-icon' : ''} />
                     </button>
@@ -602,236 +756,177 @@ export default function AdminPanel() {
                   </div>
                 )}
 
-                {productSuccess && (
-                  <div className="admin-alert-success" role="status">
-                    <CheckCircle2 size={15} /><span>{productSuccess}</span>
-                  </div>
-                )}
-
-                {/* Add / Edit Product Form Card */}
-                {showProductForm && (
-                  <div className="admin-form-card admin-product-form-card">
-                    <div className="admin-card-header-row">
-                      <h3 className="admin-form-card-title font-royal">
-                        {editingProduct ? <Edit size={16} /> : <Plus size={16} />}
-                        {editingProduct ? `Edit Product #${editingProduct.id}` : 'Add New Product'}
-                      </h3>
-                      <button
-                        type="button"
-                        className="admin-close-btn"
-                        onClick={() => { setShowProductForm(false); setEditingProduct(null); }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    {productError && (
-                      <div className="admin-alert-error" role="alert">
-                        <AlertCircle size={14} /><span>{productError}</span>
-                      </div>
-                    )}
-
-                    <form onSubmit={handleProductSave} className="admin-product-form">
-                      <div className="admin-form-row">
-                        <div className="admin-field-group">
-                          <label className="admin-field-label font-royal">Product Name *</label>
-                          <input
-                            type="text"
-                            className="admin-plain-input"
-                            placeholder="e.g. Royal OUD Extrait de Parfum"
-                            value={productForm.product_name}
-                            onChange={e => setProductForm(p => ({ ...p, product_name: e.target.value }))}
-                            required
-                          />
-                        </div>
-
-                        <div className="admin-field-group">
-                          <label className="admin-field-label font-royal">Price (₹) *</label>
-                          <div className="admin-input-adornment-box">
-                            <IndianRupee size={15} className="adornment-icon" />
-                            <input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              className="admin-plain-input with-adornment"
-                              placeholder="2499.00"
-                              value={productForm.price}
-                              onChange={e => setProductForm(p => ({ ...p, price: e.target.value }))}
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="admin-field-group">
-                          <label className="admin-field-label font-royal">Status</label>
-                          <select
-                            className="admin-select w-full"
-                            value={productForm.status}
-                            onChange={e => setProductForm(p => ({ ...p, status: e.target.value }))}
-                          >
-                            <option value="active">Active (Available)</option>
-                            <option value="inactive">Inactive (Hidden)</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="admin-form-row">
-                        <div className="admin-field-group">
-                          <label className="admin-field-label font-royal">Image URL / Path</label>
-                          <div className="admin-input-adornment-box">
-                            <ImageIcon size={15} className="adornment-icon" />
-                            <input
-                              type="text"
-                              className="admin-plain-input with-adornment"
-                              placeholder="https://... or /perfume.png"
-                              value={productForm.image}
-                              onChange={e => setProductForm(p => ({ ...p, image: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-
-                        {productForm.image && (
-                          <div className="product-form-preview-box">
-                            <span className="product-form-preview-label font-royal">Image Preview</span>
-                            <img
-                              src={productForm.image}
-                              alt="Preview"
-                              className="product-form-preview-img"
-                              onError={e => { e.target.style.display = 'none'; }}
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="admin-field-group">
-                        <label className="admin-field-label font-royal">Description</label>
-                        <textarea
-                          rows={3}
-                          className="admin-textarea"
-                          placeholder="Fragrance notes, bottle size, longevity details, etc."
-                          value={productForm.description}
-                          onChange={e => setProductForm(p => ({ ...p, description: e.target.value }))}
-                        />
-                      </div>
-
-                      <div className="admin-btn-row">
-                        <button type="submit" disabled={productSaving} className="admin-submit-btn font-royal">
-                          {productSaving
-                            ? <span className="admin-btn-content"><RefreshCw size={15} className="spin-icon" /> Saving Product...</span>
-                            : <span>{editingProduct ? 'Update Product' : 'Save & Add Product'}</span>}
-                        </button>
-                        <button
-                          type="button"
-                          className="admin-cancel-btn font-royal"
-                          onClick={() => {
-                            setEditingProduct(null);
-                            setShowProductForm(false);
-                            setProductForm({ ...EMPTY_PRODUCT });
-                            setProductError('');
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
-
-                {/* Products List Table with product_name, price, image, description, status, add_time */}
+                {/* Orders Data Table */}
                 <div className="admin-table-card">
                   <div className="admin-table-responsive">
                     <table className="admin-data-table">
                       <thead>
                         <tr>
-                          <th className="font-royal">ID</th>
-                          <th className="font-royal">Image</th>
-                          <th className="font-royal">Product Name</th>
-                          <th className="font-royal">Price</th>
-                          <th className="font-royal">Description</th>
-                          <th className="font-royal">Status</th>
-                          <th className="font-royal">Added On</th>
+                          <th className="font-royal">Bill #</th>
+                          <th className="font-royal">Date & Time</th>
+                          <th className="font-royal">Customer Details</th>
+                          <th className="font-royal">Type</th>
+                          <th className="font-royal">Line Items</th>
+                          <th className="font-royal">Amount (₹)</th>
+                          <th className="font-royal">Payment Mode</th>
+                          <th className="font-royal">Payment Status</th>
                           <th className="font-royal text-center">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {dataLoading && !products.length ? (
-                          <tr><td colSpan="8" className="admin-td-empty"><RefreshCw size={18} className="spin-icon" /> Loading products...</td></tr>
-                        ) : filteredProducts.length === 0 ? (
-                          <tr><td colSpan="8" className="admin-td-empty">No products found. Click "Add Product" above to create one.</td></tr>
-                        ) : filteredProducts.map(product => (
-                          <tr key={product.id}>
-                            <td className="admin-td-id">#{product.id}</td>
-                            <td className="product-img-cell">
-                              {product.image ? (
-                                <img
-                                  src={product.image}
-                                  alt={product.product_name}
-                                  className="product-thumb"
-                                  onError={e => { e.target.style.display = 'none'; }}
-                                />
-                              ) : (
-                                <div className="product-thumb-placeholder">
-                                  <ImageIcon size={18} />
-                                </div>
-                              )}
-                            </td>
-                            <td>
-                              <span className="customer-name-bold">{product.product_name}</span>
-                            </td>
-                            <td className="product-price-cell font-royal">
-                              ₹{Number(product.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                            </td>
-                            <td className="product-desc-cell">
-                              {product.description ? (
-                                <span className="product-desc-text" title={product.description}>
-                                  {product.description.slice(0, 75)}{product.description.length > 75 ? '…' : ''}
-                                </span>
-                              ) : (
-                                <span className="admin-subtext">—</span>
-                              )}
-                            </td>
-                            <td>
-                              <button
-                                type="button"
-                                className={`product-status-pill ${product.status === 'active' ? 'status-active' : 'status-inactive'}`}
-                                onClick={() => handleToggleProductStatus(product)}
-                                title="Click to toggle active/inactive"
-                              >
-                                {product.status === 'active' ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
-                                <span>{product.status}</span>
-                              </button>
-                            </td>
-                            <td className="admin-td-date">
-                              {product.add_time ? (
-                                <>
-                                  <div>{new Date(product.add_time).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</div>
-                                  <small className="time-display">{new Date(product.add_time).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</small>
-                                </>
-                              ) : '—'}
-                            </td>
-                            <td>
-                              <div className="product-actions">
-                                <button
-                                  type="button"
-                                  className="product-edit-btn font-royal"
-                                  onClick={() => handleEditProduct(product)}
-                                  title="Edit Product"
-                                >
-                                  <Edit size={13} />
-                                  <span>Edit</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  className="product-delete-btn"
-                                  onClick={() => handleDeleteProduct(product.id)}
-                                  title="Delete Product"
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              </div>
+                        {dataLoading && !orders.length ? (
+                          <tr><td colSpan="9" className="admin-td-empty"><RefreshCw size={18} className="spin-icon" /> Loading order report...</td></tr>
+                        ) : filteredOrders.length === 0 ? (
+                          <tr>
+                            <td colSpan="9" className="admin-td-empty">
+                              No orders found. Click "Create Order" to book your first sale.
                             </td>
                           </tr>
-                        ))}
+                        ) : filteredOrders.map(order => {
+                          const isExpanded = expandedOrderId === order.id;
+                          return (
+                            <React.Fragment key={order.id}>
+                              <tr>
+                                <td className="admin-td-id font-royal">
+                                  <span className="order-id-badge">#MOH-{order.id}</span>
+                                </td>
+                                <td className="admin-td-date">
+                                  <div>{order.order_datetime ? new Date(order.order_datetime).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}</div>
+                                  <small className="time-display">{order.order_datetime ? new Date(order.order_datetime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : ''}</small>
+                                </td>
+                                <td>
+                                  <div className="customer-name-bold">{order.customer_name}</div>
+                                  <div className="admin-subtext">{order.phone}</div>
+                                  {order.email && <div className="admin-subtext-light">{order.email}</div>}
+                                </td>
+                                <td>
+                                  <span className={`order-type-pill type-${(order.order_type || 'offline').toLowerCase()}`}>
+                                    {order.order_type || 'offline'}
+                                  </span>
+                                </td>
+                                <td className="order-items-preview-cell">
+                                  <button
+                                    type="button"
+                                    className="order-items-toggle-btn font-royal"
+                                    onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                                    title="View items breakdown"
+                                  >
+                                    <span>{(order.items || []).length} item{(order.items || []).length === 1 ? '' : 's'}</span>
+                                    {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                                  </button>
+                                  <div className="order-items-summary-text">
+                                    {(order.items || []).map(i => `${i.product_name} (x${i.quantity})`).join(', ')}
+                                  </div>
+                                </td>
+                                <td className="product-price-cell font-royal">
+                                  ₹{Number(order.total_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                </td>
+                                <td>
+                                  <span className="payment-mode-badge">{order.payment_mode || 'Cash'}</span>
+                                </td>
+                                <td>
+                                  <div className="status-dropdown-wrapper">
+                                    <select
+                                      value={order.payment_status || 'pending'}
+                                      onChange={e => handleOrderStatusUpdate(order.id, e.target.value)}
+                                      disabled={updatingId === order.id}
+                                      className={`status-select status-${(order.payment_status || 'pending').toLowerCase()}`}
+                                    >
+                                      <option value="success">Success</option>
+                                      <option value="pending">Pending</option>
+                                      <option value="failed">Failed</option>
+                                      <option value="cancelled">Cancelled</option>
+                                    </select>
+                                    {updatingId === order.id && <RefreshCw size={12} className="spin-icon status-spin" />}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className={`order-paid-toggle ${order.paid_status === 1 ? 'paid-yes' : 'paid-no'}`}
+                                    onClick={() => handlePaidStatusToggle(order)}
+                                    title="Click to toggle Paid/Unpaid"
+                                  >
+                                    {order.paid_status === 1 ? 'Paid' : 'Unpaid'}
+                                  </button>
+                                </td>
+                                <td>
+                                  <div className="order-row-actions">
+                                    <button
+                                      type="button"
+                                      className="btn-order-action btn-pdf"
+                                      onClick={() => handleDownloadPDF(order)}
+                                      title="Download Tax Invoice (PDF)"
+                                    >
+                                      <Download size={13} />
+                                      <span>PDF</span>
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      className="btn-order-action btn-print"
+                                      onClick={() => printInvoice(order, order.gst_number || '27AABCM1234F1Z1')}
+                                      title="Print Tax Invoice"
+                                    >
+                                      <Printer size={13} />
+                                    </button>
+
+                                    {order.whatsapp_url && (
+                                      <a
+                                        href={order.whatsapp_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn-order-action btn-whatsapp"
+                                        title="Send receipt on WhatsApp"
+                                      >
+                                        <MessageSquare size={13} />
+                                      </a>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+
+                              {/* Expanded Row for Line Items Breakdown */}
+                              {isExpanded && (
+                                <tr className="order-expanded-row">
+                                  <td colSpan="9">
+                                    <div className="order-details-expanded-box">
+                                      <h4 className="font-royal expanded-box-title">
+                                        Line Items Breakdown for Order #MOH-{order.id}:
+                                      </h4>
+                                      <div className="expanded-table-wrap">
+                                        <table className="expanded-inner-table">
+                                          <thead>
+                                            <tr>
+                                              <th>#</th>
+                                              <th>Product Name</th>
+                                              <th className="text-center">Quantity</th>
+                                              <th className="text-right">Unit Price</th>
+                                              <th className="text-right">Total Price</th>
+                                            </tr>
+                                          </thead>
+                                          <tbody>
+                                            {(order.items || []).map((itm, i) => (
+                                              <tr key={itm.id || i}>
+                                                <td>{i + 1}</td>
+                                                <td className="font-semibold">{itm.product_name}</td>
+                                                <td className="text-center">{itm.quantity}</td>
+                                                <td className="text-right">₹{Number(itm.unit_price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                                <td className="text-right font-royal text-gold">₹{Number(itm.total_price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                      <div className="expanded-footer-info">
+                                        <span>Delivery Address: <strong>{order.address || 'In-Store Counter'}</strong></span>
+                                        <span>GSTIN: <strong>{order.gst_number || '27AABCM1234F1Z1'}</strong></span>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -840,7 +935,7 @@ export default function AdminPanel() {
             )}
 
             {/* ════════════════════ CREATE ORDER TAB ════════════════════ */}
-            {activeTab === 'orders' && (
+            {activeTab === 'create-order' && (
               <div className="admin-order-form-wrapper">
 
                 {/* Bill Created Success Banner with PDF Download */}
@@ -881,7 +976,7 @@ export default function AdminPanel() {
                         <button
                           type="button"
                           className="btn-bill-download font-royal"
-                          onClick={handleDownloadPDF}
+                          onClick={() => handleDownloadPDF(lastCreatedOrder)}
                           disabled={pdfGenerating}
                         >
                           <Download size={16} />
@@ -947,7 +1042,7 @@ export default function AdminPanel() {
                   )}
 
                   <form onSubmit={handleOrderSubmit} className="admin-order-form">
-                    {/* Customer Info */}
+                    {/* Customer Info (Manual Filling Only) */}
                     <fieldset className="order-fieldset">
                       <legend className="font-royal order-legend">Customer Details</legend>
                       <div className="admin-form-row">
@@ -1183,29 +1278,337 @@ export default function AdminPanel() {
               </div>
             )}
 
+            {/* ════════════════════ PRODUCTS TAB ════════════════════ */}
+            {activeTab === 'products' && (
+              <div className="admin-products-view">
+                <div className="admin-dash-header">
+                  <div className="admin-title-group">
+                    <h2 className="admin-section-heading font-royal">
+                      <Package size={20} className="gold-icon" />
+                      Product Catalogue
+                    </h2>
+                    <span className="admin-section-subtext">Manage luxury perfumes, prices, stock statuses, and descriptions</span>
+                  </div>
+
+                  <div className="admin-controls">
+                    <button
+                      type="button"
+                      className="admin-add-product-toggle-btn font-royal"
+                      onClick={() => {
+                        if (showProductForm && !editingProduct) {
+                          setShowProductForm(false);
+                        } else {
+                          setEditingProduct(null);
+                          setProductForm({ ...EMPTY_PRODUCT });
+                          setShowProductForm(true);
+                        }
+                        setProductError('');
+                        setProductSuccess('');
+                      }}
+                    >
+                      <Plus size={16} />
+                      <span>{showProductForm && !editingProduct ? 'Close Form' : 'Add Product'}</span>
+                    </button>
+
+                    <div className="admin-search-box">
+                      <Search size={15} className="admin-search-icon" />
+                      <input
+                        type="text"
+                        placeholder="Search products..."
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        className="admin-search-input"
+                      />
+                    </div>
+
+                    <select
+                      value={statusFilter}
+                      onChange={e => setStatusFilter(e.target.value)}
+                      className="admin-select"
+                      aria-label="Filter products by status"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="active">Active Only</option>
+                      <option value="inactive">Inactive Only</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={fetchDashboardData}
+                      disabled={dataLoading}
+                      className="admin-refresh-btn"
+                      title="Refresh product list"
+                    >
+                      <RefreshCw size={16} className={dataLoading ? 'spin-icon' : ''} />
+                    </button>
+                  </div>
+                </div>
+
+                {dataError && (
+                  <div className="admin-alert-error" role="alert">
+                    <AlertCircle size={15} /><span>{dataError}</span>
+                  </div>
+                )}
+
+                {productSuccess && (
+                  <div className="admin-alert-success" role="status">
+                    <CheckCircle2 size={15} /><span>{productSuccess}</span>
+                  </div>
+                )}
+
+                {/* Add / Edit Product Form Card */}
+                {showProductForm && (
+                  <div className="admin-form-card admin-product-form-card">
+                    <div className="admin-card-header-row">
+                      <h3 className="admin-form-card-title font-royal">
+                        {editingProduct ? <Edit size={16} /> : <Plus size={16} />}
+                        {editingProduct ? `Edit Product #${editingProduct.id}` : 'Add New Product'}
+                      </h3>
+                      <button
+                        type="button"
+                        className="admin-close-btn"
+                        onClick={() => { setShowProductForm(false); setEditingProduct(null); }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {productError && (
+                      <div className="admin-alert-error" role="alert">
+                        <AlertCircle size={14} /><span>{productError}</span>
+                      </div>
+                    )}
+
+                    <form onSubmit={handleProductSave} className="admin-product-form">
+                      <div className="admin-form-row">
+                        <div className="admin-field-group">
+                          <label className="admin-field-label font-royal">Product Name *</label>
+                          <input
+                            type="text"
+                            className="admin-plain-input"
+                            placeholder="e.g. Royal OUD Extrait de Parfum"
+                            value={productForm.product_name}
+                            onChange={e => setProductForm(p => ({ ...p, product_name: e.target.value }))}
+                            required
+                          />
+                        </div>
+
+                        <div className="admin-field-group">
+                          <label className="admin-field-label font-royal">Price (₹) *</label>
+                          <div className="admin-input-adornment-box">
+                            <IndianRupee size={15} className="adornment-icon" />
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              className="admin-plain-input with-adornment"
+                              placeholder="2499.00"
+                              value={productForm.price}
+                              onChange={e => setProductForm(p => ({ ...p, price: e.target.value }))}
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="admin-field-group">
+                          <label className="admin-field-label font-royal">Status</label>
+                          <select
+                            className="admin-select w-full"
+                            value={productForm.status}
+                            onChange={e => setProductForm(p => ({ ...p, status: e.target.value }))}
+                          >
+                            <option value="active">Active (Available)</option>
+                            <option value="inactive">Inactive (Hidden)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="admin-form-row">
+                        <div className="admin-field-group">
+                          <label className="admin-field-label font-royal">Image URL / Path</label>
+                          <div className="admin-input-adornment-box">
+                            <ImageIcon size={15} className="adornment-icon" />
+                            <input
+                              type="text"
+                              className="admin-plain-input with-adornment"
+                              placeholder="https://... or /perfume.png"
+                              value={productForm.image}
+                              onChange={e => setProductForm(p => ({ ...p, image: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+
+                        {productForm.image && (
+                          <div className="product-form-preview-box">
+                            <span className="product-form-preview-label font-royal">Image Preview</span>
+                            <img
+                              src={productForm.image}
+                              alt="Preview"
+                              className="product-form-preview-img"
+                              onError={e => { e.target.style.display = 'none'; }}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="admin-field-group">
+                        <label className="admin-field-label font-royal">Description</label>
+                        <textarea
+                          rows={3}
+                          className="admin-textarea"
+                          placeholder="Fragrance notes, bottle size, longevity details, etc."
+                          value={productForm.description}
+                          onChange={e => setProductForm(p => ({ ...p, description: e.target.value }))}
+                        />
+                      </div>
+
+                      <div className="admin-btn-row">
+                        <button type="submit" disabled={productSaving} className="admin-submit-btn font-royal">
+                          {productSaving
+                            ? <span className="admin-btn-content"><RefreshCw size={15} className="spin-icon" /> Saving Product...</span>
+                            : <span>{editingProduct ? 'Update Product' : 'Save & Add Product'}</span>}
+                        </button>
+                        <button
+                          type="button"
+                          className="admin-cancel-btn font-royal"
+                          onClick={() => {
+                            setEditingProduct(null);
+                            setShowProductForm(false);
+                            setProductForm({ ...EMPTY_PRODUCT });
+                            setProductError('');
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                {/* Products List Table */}
+                <div className="admin-table-card">
+                  <div className="admin-table-responsive">
+                    <table className="admin-data-table">
+                      <thead>
+                        <tr>
+                          <th className="font-royal">ID</th>
+                          <th className="font-royal">Image</th>
+                          <th className="font-royal">Product Name</th>
+                          <th className="font-royal">Price</th>
+                          <th className="font-royal">Description</th>
+                          <th className="font-royal">Status</th>
+                          <th className="font-royal">Added On</th>
+                          <th className="font-royal text-center">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dataLoading && !products.length ? (
+                          <tr><td colSpan="8" className="admin-td-empty"><RefreshCw size={18} className="spin-icon" /> Loading products...</td></tr>
+                        ) : filteredProducts.length === 0 ? (
+                          <tr><td colSpan="8" className="admin-td-empty">No products found. Click "Add Product" above to create one.</td></tr>
+                        ) : filteredProducts.map(product => (
+                          <tr key={product.id}>
+                            <td className="admin-td-id">#{product.id}</td>
+                            <td className="product-img-cell">
+                              {product.image ? (
+                                <img
+                                  src={product.image}
+                                  alt={product.product_name}
+                                  className="product-thumb"
+                                  onError={e => { e.target.style.display = 'none'; }}
+                                />
+                              ) : (
+                                <div className="product-thumb-placeholder">
+                                  <ImageIcon size={18} />
+                                </div>
+                              )}
+                            </td>
+                            <td>
+                              <span className="customer-name-bold">{product.product_name}</span>
+                            </td>
+                            <td className="product-price-cell font-royal">
+                              ₹{Number(product.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            </td>
+                            <td className="product-desc-cell">
+                              {product.description ? (
+                                <span className="product-desc-text" title={product.description}>
+                                  {product.description.slice(0, 75)}{product.description.length > 75 ? '…' : ''}
+                                </span>
+                              ) : (
+                                <span className="admin-subtext">—</span>
+                              )}
+                            </td>
+                            <td>
+                              <button
+                                type="button"
+                                className={`product-status-pill ${product.status === 'active' ? 'status-active' : 'status-inactive'}`}
+                                onClick={() => handleToggleProductStatus(product)}
+                                title="Click to toggle active/inactive"
+                              >
+                                {product.status === 'active' ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
+                                <span>{product.status}</span>
+                              </button>
+                            </td>
+                            <td className="admin-td-date">
+                              {product.add_time ? (
+                                <>
+                                  <div>{new Date(product.add_time).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                                  <small className="time-display">{new Date(product.add_time).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</small>
+                                </>
+                              ) : '—'}
+                            </td>
+                            <td>
+                              <div className="product-actions">
+                                <button
+                                  type="button"
+                                  className="product-edit-btn font-royal"
+                                  onClick={() => handleEditProduct(product)}
+                                  title="Edit Product"
+                                >
+                                  <Edit size={13} />
+                                  <span>Edit</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  className="product-delete-btn"
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                  title="Delete Product"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ════════════════════ ENQUIRIES TAB ════════════════════ */}
             {activeTab === 'enquiries' && (
               <div className="admin-enquiries-view">
-                {/* KPI Ribbon */}
                 <div className="enquiry-metrics-grid">
                   <div className="metric-card">
                     <div className="metric-header"><span className="metric-title font-royal">Total Inquiries</span><MessageSquare size={16} className="gold-icon" /></div>
-                    <div className="metric-value font-royal">{metrics.total}</div>
+                    <div className="metric-value font-royal">{enquiryMetrics.total}</div>
                     <span className="metric-subtext">All customer queries</span>
                   </div>
                   <div className="metric-card metric-status-new">
                     <div className="metric-header"><span className="metric-title font-royal">New / Pending</span><Clock size={16} className="status-icon-pending" /></div>
-                    <div className="metric-value font-royal">{metrics.newCount}</div>
+                    <div className="metric-value font-royal">{enquiryMetrics.newCount}</div>
                     <span className="metric-subtext">Needs attention</span>
                   </div>
                   <div className="metric-card metric-status-progress">
                     <div className="metric-header"><span className="metric-title font-royal">In Progress</span><Sparkles size={16} className="status-icon-progress" /></div>
-                    <div className="metric-value font-royal">{metrics.inProgressCount}</div>
+                    <div className="metric-value font-royal">{enquiryMetrics.inProgressCount}</div>
                     <span className="metric-subtext">Under review</span>
                   </div>
                   <div className="metric-card metric-status-resolved">
                     <div className="metric-header"><span className="metric-title font-royal">Resolved</span><CheckCircle2 size={16} className="status-icon-resolved" /></div>
-                    <div className="metric-value font-royal">{metrics.resolvedCount}</div>
+                    <div className="metric-value font-royal">{enquiryMetrics.resolvedCount}</div>
                     <span className="metric-subtext">Completed inquiries</span>
                   </div>
                 </div>
@@ -1242,7 +1645,7 @@ export default function AdminPanel() {
 
                     <button
                       type="button"
-                      onClick={exportToCSV}
+                      onClick={exportEnquiriesToCSV}
                       disabled={enquiries.length === 0}
                       className="admin-action-btn font-royal"
                       title="Export Enquiries to CSV"

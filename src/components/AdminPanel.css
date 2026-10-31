@@ -1513,3 +1513,271 @@
   align-items: center;
   gap: 0.55rem;
 }
+
+/* ========================================================================== */
+/* ORDERS REPORT STYLES                                                       */
+/* ========================================================================== */
+
+.order-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card.metric-revenue {
+  background: linear-gradient(135deg, #ffffff, #fdfbf7);
+  border-color: var(--gold-border-bright);
+  box-shadow: 0 4px 18px rgba(180, 140, 32, 0.1);
+}
+
+.metric-card.metric-revenue .metric-value {
+  color: var(--gold-800);
+}
+
+.order-id-badge {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold-800);
+  background: rgba(180, 140, 32, 0.1);
+  border: 1px solid var(--gold-border-bright);
+  border-radius: 6px;
+}
+
+.order-type-pill {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 20px;
+}
+
+.order-type-pill.type-offline {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.order-type-pill.type-phone {
+  background: #e0e7ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+
+.order-type-pill.type-online {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+
+.payment-mode-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.order-paid-toggle {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.order-paid-toggle.paid-yes {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.order-paid-toggle.paid-no {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.order-paid-toggle:hover {
+  opacity: 0.8;
+  transform: scale(1.03);
+}
+
+.order-items-preview-cell {
+  max-width: 240px;
+}
+
+.order-items-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--gold-700);
+  background: rgba(180, 140, 32, 0.08);
+  border: 1px solid var(--gold-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.order-items-toggle-btn:hover {
+  background: var(--gold-700);
+  color: #ffffff;
+}
+
+.order-items-summary-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.order-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-order-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-order-action.btn-pdf {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--gold-600), var(--gold-800));
+  border: 1px solid var(--gold-700);
+}
+
+.btn-order-action.btn-pdf:hover {
+  background: linear-gradient(135deg, var(--gold-500), var(--gold-700));
+  box-shadow: 0 2px 8px rgba(180, 140, 32, 0.25);
+}
+
+.btn-order-action.btn-print {
+  color: var(--gold-800);
+  background: #faf8f5;
+  border: 1px solid var(--gold-border);
+}
+
+.btn-order-action.btn-print:hover {
+  background: #ffffff;
+  border-color: var(--gold-600);
+}
+
+.btn-order-action.btn-whatsapp {
+  color: #065f46;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.btn-order-action.btn-whatsapp:hover {
+  background: #d1fae5;
+  border-color: #34d399;
+}
+
+/* Expanded Order Details Row */
+.order-expanded-row td {
+  background: #faf8f5 !important;
+  padding: 1.25rem 2rem !important;
+}
+
+.order-details-expanded-box {
+  background: #ffffff;
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.expanded-box-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 1rem;
+}
+
+.expanded-table-wrap {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.expanded-inner-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.expanded-inner-table th {
+  padding: 0.6rem 0.8rem;
+  background: rgba(180, 140, 32, 0.08);
+  color: var(--gold-800);
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid var(--gold-border);
+}
+
+.expanded-inner-table td {
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid rgba(180, 140, 32, 0.1);
+  color: var(--text-dark);
+}
+
+.expanded-inner-table .text-gold {
+  color: var(--gold-800);
+  font-weight: 600;
+}
+
+.expanded-footer-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--gold-border);
+}
+
+.expanded-footer-info strong {
+  color: var(--text-dark);
+}
+
+@media (max-width: 992px) {
+  .order-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .order-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

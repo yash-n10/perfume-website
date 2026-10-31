@@ -104,4 +104,21 @@ export const api = {
 
     // Orders APIs
     createOrder: (payload) => request('/api/orders', { method: 'POST', body: payload }),
+    listOrders: (token, params = {}) => {
+        const query = new URLSearchParams(params).toString();
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/orders${query ? `?${query}` : ''}`, { headers }).then(r => r.json());
+    },
+    updateOrderStatus: (token, orderId, payload) => {
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(payload),
+        }).then(r => r.json());
+    },
+    getOrder: (token, orderId) => {
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/orders/${orderId}`, { headers }).then(r => r.json());
+    },
 };
