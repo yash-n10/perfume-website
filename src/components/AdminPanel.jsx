@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Lock,
   User as UserIcon,
@@ -11,7 +11,14 @@ import {
   ArrowLeft,
   RefreshCw,
   Search,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Sparkles,
+  Phone,
+  Mail
 } from 'lucide-react';
 import { api } from '../api';
 import logo from '/logo_white.png';
@@ -32,13 +39,14 @@ export default function AdminPanel() {
   const [loginError, setLoginError] = useState('');
 
   // Dashboard state
-  const [activeTab, setActiveTab] = useState('users'); // 'users' | 'enquiries'
+  const [activeTab, setActiveTab] = useState('enquiries'); // default to 'enquiries' report
   const [users, setUsers] = useState([]);
   const [enquiries, setEnquiries] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [dataError, setDataError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [updatingId, setUpdatingId] = useState(null);
 
   const handleLogout = useCallback(() => {
     setToken('');
@@ -76,7 +84,12 @@ export default function AdminPanel() {
         }
       }
     } catch (err) {
-      if (err.message && (err.message.includes('401') || err.message.toLowerCase().includes('credential') || err.message.toLowerCase().includes('token'))) {
+      if (
+        err.message &&
+        (err.message.includes('401') ||
+          err.message.toLowerCase().includes('credential') ||
+          err.message.toLowerCase().includes('token'))
+      ) {
         handleLogout();
         setLoginError('Admin session expired. Please log in again.');
       } else {
@@ -125,6 +138,57 @@ export default function AdminPanel() {
       setLoginLoading(false);
     }
   };
+
+  // Status Change Handler
+  const handleStatusChange = async (enquiryId, newStatus) => {
+    if (!token) return;
+    setUpdatingId(enquiryId);
+    try {
+      const updated = await api.updateAdminEnquiryStatus(token, enquiryId, newStatus);
+      if (updated && updated.id) {
+        setEnquiries((prev) =>
+          prev.map((item) => (item.id === enquiryId ? { ...item, status: newStatus } : item))
+        );
+      }
+    } catch (err) {
+      alert(`Could not update status: ${err.message}`);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  // CSV Export for Enquiries Report
+  const exportToCSV = () => {
+    if (!enquiries.length) return;
+    const headers = ['ID', 'Customer Name', 'Email', 'Phone', 'Status', 'Date', 'Enquiry Message'];
+    const rows = enquiries.map((item) => [
+      item.id,
+      `"${(item.name || '').replace(/"/g, '""')}"`,
+      `"${(item.email || '').replace(/"/g, '""')}"`,
+      `"${(item.phone || '').replace(/"/g, '""')}"`,
+      `"${(item.status || 'new').replace(/"/g, '""')}"`,
+      `"${item.created_at ? new Date(item.created_at).toISOString() : ''}"`,
+      `"${(item.enquiry || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `mohera_enquiries_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // KPI Metrics Calculation
+  const metrics = useMemo(() => {
+    const total = enquiries.length;
+    const newCount = enquiries.filter((e) => !e.status || e.status === 'new' || e.status === 'pending').length;
+    const inProgressCount = enquiries.filter((e) => e.status === 'in_progress' || e.status === 'in_review').length;
+    const resolvedCount = enquiries.filter((e) => e.status === 'resolved').length;
+    return { total, newCount, inProgressCount, resolvedCount };
+  }, [enquiries]);
 
   // Filtered views
   const filteredUsers = users.filter((u) => {
@@ -284,27 +348,68 @@ export default function AdminPanel() {
           /* DASHBOARD VIEW                                               */
           /* ============================================================ */
           <div className="admin-dashboard-container">
+            {/* KPI Metrics Ribbon for Enquiries */}
+            {activeTab === 'enquiries' && (
+              <div className="enquiry-metrics-grid">
+                <div className="metric-card">
+                  <div className="metric-header">
+                    <span className="metric-title font-royal">Total Inquiries</span>
+                    <MessageSquare size={16} className="gold-icon" />
+                  </div>
+                  <div className="metric-value font-royal">{metrics.total}</div>
+                  <span className="metric-subtext">All customer queries</span>
+                </div>
+
+                <div className="metric-card metric-status-new">
+                  <div className="metric-header">
+                    <span className="metric-title font-royal">New / Pending</span>
+                    <Clock size={16} className="status-icon-pending" />
+                  </div>
+                  <div className="metric-value font-royal">{metrics.newCount}</div>
+                  <span className="metric-subtext">Needs attention</span>
+                </div>
+
+                <div className="metric-card metric-status-progress">
+                  <div className="metric-header">
+                    <span className="metric-title font-royal">In Progress</span>
+                    <Sparkles size={16} className="status-icon-progress" />
+                  </div>
+                  <div className="metric-value font-royal">{metrics.inProgressCount}</div>
+                  <span className="metric-subtext">Under review</span>
+                </div>
+
+                <div className="metric-card metric-status-resolved">
+                  <div className="metric-header">
+                    <span className="metric-title font-royal">Resolved</span>
+                    <CheckCircle2 size={16} className="status-icon-resolved" />
+                  </div>
+                  <div className="metric-value font-royal">{metrics.resolvedCount}</div>
+                  <span className="metric-subtext">Completed inquiries</span>
+                </div>
+              </div>
+            )}
+
             {/* Navigation Tabs & Controls */}
             <div className="admin-dash-header">
               <div className="admin-tabs">
-                <button
-                  type="button"
-                  className={`admin-tab-btn font-royal ${activeTab === 'users' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('users')}
-                >
-                  <Users size={16} />
-                  <span>Users Directory</span>
-                  <span className="admin-tab-count">{users.length}</span>
-                </button>
-
                 <button
                   type="button"
                   className={`admin-tab-btn font-royal ${activeTab === 'enquiries' ? 'active' : ''}`}
                   onClick={() => setActiveTab('enquiries')}
                 >
                   <MessageSquare size={16} />
-                  <span>Customer Enquiries</span>
+                  <span>Enquiries Report</span>
                   <span className="admin-tab-count">{enquiries.length}</span>
+                </button>
+
+                <button
+                  type="button"
+                  className={`admin-tab-btn font-royal ${activeTab === 'users' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('users')}
+                >
+                  <Users size={16} />
+                  <span>Registered Users</span>
+                  <span className="admin-tab-count">{users.length}</span>
                 </button>
               </div>
 
@@ -315,7 +420,7 @@ export default function AdminPanel() {
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder={activeTab === 'users' ? 'Search by name, email, phone...' : 'Search enquiries...'}
+                    placeholder={activeTab === 'users' ? 'Search users...' : 'Search enquiries by name, email, query...'}
                     className="admin-search-input"
                   />
                   {searchTerm && (
@@ -330,16 +435,29 @@ export default function AdminPanel() {
                 </div>
 
                 {activeTab === 'enquiries' && (
-                  <select
-                    className="admin-select"
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <option value="">All Statuses</option>
-                    <option value="pending">Pending</option>
-                    <option value="in_review">In Review</option>
-                    <option value="resolved">Resolved</option>
-                  </select>
+                  <>
+                    <select
+                      className="admin-select"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="new">New</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={exportToCSV}
+                      disabled={enquiries.length === 0}
+                      className="admin-export-btn font-royal"
+                      title="Download CSV Report"
+                    >
+                      <Download size={14} />
+                      <span>Export CSV</span>
+                    </button>
+                  </>
                 )}
 
                 <button
@@ -398,13 +516,15 @@ export default function AdminPanel() {
                             <td className="admin-td-email">{user.email}</td>
                             <td className="admin-td-phone">{user.phone}</td>
                             <td className="admin-td-date">
-                              {user.created_at ? new Date(user.created_at).toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              }) : '—'}
+                              {user.created_at
+                                ? new Date(user.created_at).toLocaleDateString(undefined, {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })
+                                : '—'}
                             </td>
                           </tr>
                         ))
@@ -413,17 +533,17 @@ export default function AdminPanel() {
                   </table>
                 </div>
               ) : (
-                /* Enquiries Table */
+                /* Enhanced Enquiries Report Table */
                 <div className="admin-table-responsive">
                   <table className="admin-data-table">
                     <thead>
                       <tr>
                         <th className="font-royal">ID</th>
                         <th className="font-royal">Customer</th>
-                        <th className="font-royal">Contact Info</th>
-                        <th className="font-royal">Enquiry / Message</th>
-                        <th className="font-royal">Status</th>
-                        <th className="font-royal">Date</th>
+                        <th className="font-royal">Contact Details</th>
+                        <th className="font-royal">Customer Enquiry Message</th>
+                        <th className="font-royal">Status / Action</th>
+                        <th className="font-royal">Date Submitted</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -436,37 +556,75 @@ export default function AdminPanel() {
                       ) : filteredEnquiries.length === 0 ? (
                         <tr>
                           <td colSpan="6" className="admin-td-empty">
-                            No enquiries found.
+                            No enquiries found matching criteria.
                           </td>
                         </tr>
                       ) : (
-                        filteredEnquiries.map((enq) => (
-                          <tr key={enq.id}>
-                            <td className="admin-td-id">#{enq.id}</td>
-                            <td className="admin-td-name">{enq.name}</td>
-                            <td className="admin-td-contact">
-                              <div>{enq.email}</div>
-                              <small className="admin-subtext">{enq.phone}</small>
-                            </td>
-                            <td className="admin-td-message">
-                              <p className="admin-message-bubble">{enq.enquiry}</p>
-                            </td>
-                            <td className="admin-td-status">
-                              <span className={`status-badge status-${(enq.status || 'pending').toLowerCase()}`}>
-                                {enq.status || 'pending'}
-                              </span>
-                            </td>
-                            <td className="admin-td-date">
-                              {enq.created_at ? new Date(enq.created_at).toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              }) : '—'}
-                            </td>
-                          </tr>
-                        ))
+                        filteredEnquiries.map((enq) => {
+                          const currentStatus = (enq.status || 'new').toLowerCase();
+                          return (
+                            <tr key={enq.id}>
+                              <td className="admin-td-id">#{enq.id}</td>
+                              <td className="admin-td-name">
+                                <span className="customer-name-bold">{enq.name}</span>
+                              </td>
+                              <td className="admin-td-contact">
+                                <a href={`mailto:${enq.email}`} className="contact-link" title="Send email">
+                                  <Mail size={12} />
+                                  <span>{enq.email}</span>
+                                </a>
+                                <a href={`tel:${enq.phone}`} className="contact-link sub-contact" title="Call or WhatsApp">
+                                  <Phone size={12} />
+                                  <span>{enq.phone}</span>
+                                </a>
+                              </td>
+                              <td className="admin-td-message">
+                                <div className="admin-enquiry-box">
+                                  <p>{enq.enquiry}</p>
+                                </div>
+                              </td>
+                              <td className="admin-td-status">
+                                <div className="status-action-wrapper">
+                                  <select
+                                    className={`status-select status-select-${currentStatus}`}
+                                    value={currentStatus}
+                                    disabled={updatingId === enq.id}
+                                    onChange={(e) => handleStatusChange(enq.id, e.target.value)}
+                                  >
+                                    <option value="new">New</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="resolved">Resolved</option>
+                                  </select>
+                                  {updatingId === enq.id && (
+                                    <RefreshCw size={12} className="spin-icon status-spinner" />
+                                  )}
+                                </div>
+                              </td>
+                              <td className="admin-td-date">
+                                <div className="date-display">
+                                  <Calendar size={12} className="date-icon" />
+                                  <span>
+                                    {enq.created_at
+                                      ? new Date(enq.created_at).toLocaleDateString(undefined, {
+                                          year: 'numeric',
+                                          month: 'short',
+                                          day: 'numeric'
+                                        })
+                                      : '—'}
+                                  </span>
+                                </div>
+                                <small className="time-display">
+                                  {enq.created_at
+                                    ? new Date(enq.created_at).toLocaleTimeString(undefined, {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })
+                                    : ''}
+                                </small>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>

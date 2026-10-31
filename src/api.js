@@ -64,4 +64,12 @@ export const api = {
         const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
         return fetch(`${API_BASE_URL}/api/admin/enquiries/report${query ? `?${query}` : ''}`, { headers }).then(r => r.json());
     },
+    updateAdminEnquiryStatus: (token, enquiryId, status) => {
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/admin/enquiries/${enquiryId}/status`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ status }),
+        }).then(r => r.json());
+    },
 };
