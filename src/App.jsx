@@ -11,16 +11,26 @@ import AdminPanel from './components/AdminPanel';
 import './App.css';
 
 export default function App() {
-  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
+  const getNormalizedPath = () => {
+    const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+    const hash = window.location.hash.toLowerCase().replace(/\/$/, '');
+    return { path, hash };
+  };
+
+  const [routeInfo, setRouteInfo] = useState(getNormalizedPath);
   const [particles, setParticles] = useState([]);
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
+      setRouteInfo(getNormalizedPath());
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
   }, []);
 
   useEffect(() => {
@@ -35,8 +45,12 @@ export default function App() {
     setParticles(generated);
   }, []);
 
-  // Check if current route is /admin_panel (or /admin_panel/)
-  const isAdminRoute = currentPath === '/admin_panel' || currentPath === '/admin_panel/';
+  // Check if route matches admin panel (supports /admin_panel, /repo-name/admin_panel, or #/admin_panel)
+  const isAdminRoute =
+    routeInfo.path.endsWith('/admin_panel') ||
+    routeInfo.path === '/admin_panel' ||
+    routeInfo.hash === '#/admin_panel' ||
+    routeInfo.hash === '#admin_panel';
 
   if (isAdminRoute) {
     return <AdminPanel />;
