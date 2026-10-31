@@ -429,3 +429,4 @@ export function printInvoice(order, gstNumber = '27AABCM1234F1Z1') {
   printWindow.document.write(html);
   printWindow.document.close();
 }
+

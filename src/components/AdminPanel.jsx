@@ -93,7 +93,6 @@ export default function AdminPanel() {
   const [orderSaving,       setOrderSaving]       = useState(false);
   const [orderError,        setOrderError]        = useState('');
   const [orderSuccess,      setOrderSuccess]      = useState('');
-  const [selectedUserId,    setSelectedUserId]    = useState('');
   const [lastCreatedOrder,  setLastCreatedOrder]  = useState(null);
   const [pdfGenerating,     setPdfGenerating]     = useState(false);
 
@@ -316,22 +315,6 @@ export default function AdminPanel() {
     }
   };
 
-  // ─── user selection for order ─────────────────────────────────────────────
-  const handleSelectUser = (userId) => {
-    setSelectedUserId(userId);
-    if (!userId) return;
-    const user = users.find(u => String(u.id) === String(userId));
-    if (user) {
-      setOrderForm(prev => ({
-        ...prev,
-        customer_name: user.name || prev.customer_name,
-        phone: user.phone || prev.phone,
-        email: user.email || prev.email,
-        address: prev.address || 'Registered Customer Address',
-      }));
-    }
-  };
-
   // ─── order form handlers ──────────────────────────────────────────────────
   const updateOrderItem = (index, field, value) => {
     setOrderForm(prev => {
@@ -409,7 +392,6 @@ export default function AdminPanel() {
       setLastCreatedOrder(result);
       setOrderSuccess(`Order #${result.id} created successfully for ${result.customer_name}! Grand Total: ₹${Number(result.total_price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`);
       setOrderForm({ ...EMPTY_ORDER, items: [{ ...EMPTY_ORDER_ITEM }] });
-      setSelectedUserId('');
     } catch (err) {
       setOrderError(err.message || 'Failed to create order.');
     } finally {
@@ -965,41 +947,6 @@ export default function AdminPanel() {
                   )}
 
                   <form onSubmit={handleOrderSubmit} className="admin-order-form">
-
-                    {/* Quick Fill from Registered Users Table */}
-                    <div className="order-user-fetch-box">
-                      <div className="fetch-label-row">
-                        <Users size={15} className="gold-icon" />
-                        <span className="font-royal fetch-title">Fetch Customer from Users Table:</span>
-                      </div>
-                      <div className="fetch-select-row">
-                        <select
-                          className="admin-select fetch-user-select"
-                          value={selectedUserId}
-                          onChange={e => handleSelectUser(e.target.value)}
-                        >
-                          <option value="">-- Choose registered customer (or enter walk-in below) --</option>
-                          {users.map(u => (
-                            <option key={u.id} value={u.id}>
-                              #{u.id} - {u.name} ({u.phone}) - {u.email}
-                            </option>
-                          ))}
-                        </select>
-                        {selectedUserId && (
-                          <button
-                            type="button"
-                            className="admin-clear-user-btn font-royal"
-                            onClick={() => {
-                              setSelectedUserId('');
-                              setOrderForm(p => ({ ...p, customer_name: '', phone: '', email: '', address: '' }));
-                            }}
-                          >
-                            Clear
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
                     {/* Customer Info */}
                     <fieldset className="order-fieldset">
                       <legend className="font-royal order-legend">Customer Details</legend>
