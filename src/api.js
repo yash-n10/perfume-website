@@ -72,4 +72,36 @@ export const api = {
             body: JSON.stringify({ status }),
         }).then(r => r.json());
     },
+
+    // Products APIs
+    listProducts: (status = null) => {
+        const query = status ? `?status=${status}` : '';
+        return request(`/api/products${query}`);
+    },
+    createProduct: (token, payload) => {
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/products`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+        }).then(r => r.json());
+    },
+    updateProduct: (token, productId, payload) => {
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/products/${productId}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify(payload),
+        }).then(r => r.json());
+    },
+    deleteProduct: (token, productId) => {
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+        return fetch(`${API_BASE_URL}/api/products/${productId}`, {
+            method: 'DELETE',
+            headers,
+        }).then(r => r.status === 204 ? true : r.json());
+    },
+
+    // Orders APIs
+    createOrder: (payload) => request('/api/orders', { method: 'POST', body: payload }),
 };
