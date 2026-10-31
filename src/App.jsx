@@ -7,10 +7,21 @@ import BrandPhilosophy from './components/BrandPhilosophy';
 import Collections from './components/Collections';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import AdminPanel from './components/AdminPanel';
 import './App.css';
 
 export default function App() {
+  const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
   const [particles, setParticles] = useState([]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     const generated = Array.from({ length: 18 }).map((_, i) => ({
@@ -23,6 +34,13 @@ export default function App() {
     }));
     setParticles(generated);
   }, []);
+
+  // Check if current route is /admin_panel (or /admin_panel/)
+  const isAdminRoute = currentPath === '/admin_panel' || currentPath === '/admin_panel/';
+
+  if (isAdminRoute) {
+    return <AdminPanel />;
+  }
 
   return (
     <div className="mohera-app">
