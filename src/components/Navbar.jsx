@@ -115,11 +115,20 @@ export default function Navbar({
 
                     <button
                       type="button"
+                      onClick={() => navigateTo('#/profile')}
+                      className="dropdown-menu-item font-royal"
+                    >
+                      <User size={14} className="gold-icon" />
+                      <span>My Profile</span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => navigateTo('#/orders')}
                       className="dropdown-menu-item font-royal"
                     >
                       <Package size={14} className="gold-icon" />
-                      <span>My Orders</span>
+                      <span>Order History</span>
                     </button>
 
                     <button
@@ -275,11 +284,20 @@ export default function Navbar({
                 <div className="mobile-user-links">
                   <button
                     type="button"
+                    onClick={() => navigateTo('#/profile')}
+                    className="mobile-user-item font-royal"
+                  >
+                    <User size={14} className="gold-icon" />
+                    <span>My Profile</span>
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => navigateTo('#/orders')}
                     className="mobile-user-item font-royal"
                   >
                     <Package size={14} className="gold-icon" />
-                    <span>My Orders</span>
+                    <span>Order History</span>
                   </button>
 
                   <button

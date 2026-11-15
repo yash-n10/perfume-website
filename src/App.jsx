@@ -12,6 +12,7 @@ import CartDrawer from './components/CartDrawer';
 import CheckoutPage from './components/CheckoutPage';
 import AddressBook from './components/AddressBook';
 import MyOrders from './components/MyOrders';
+import Profile from './components/Profile';
 import { api, getAccessToken, clearAccessToken } from './api';
 import {
   getGuestCart,
@@ -188,6 +189,11 @@ export default function App() {
     routeInfo.hash === '#/admin_panel' ||
     routeInfo.hash === '#admin_panel';
 
+  const isProfileRoute =
+    routeInfo.hash === '#/profile' ||
+    routeInfo.hash.startsWith('#/profile') ||
+    routeInfo.hash === '#profile';
+
   const isCheckoutRoute =
     routeInfo.hash === '#/checkout' ||
     routeInfo.hash === '#checkout';
@@ -267,14 +273,28 @@ export default function App() {
           onRequireAuth={() => setIsAuthOpen(true)}
           onCartUpdated={(newCart) => setCart(newCart)}
         />
-      ) : isOrdersRoute ? (
-        <MyOrders
+      ) : isProfileRoute ? (
+        <Profile
           user={user}
+          initialTab={
+            routeInfo.hash.includes('addresses')
+              ? 'addresses'
+              : routeInfo.hash.includes('reviews')
+              ? 'reviews'
+              : 'orders'
+          }
+          onRequireAuth={() => setIsAuthOpen(true)}
+        />
+      ) : isOrdersRoute ? (
+        <Profile
+          user={user}
+          initialTab="orders"
           onRequireAuth={() => setIsAuthOpen(true)}
         />
       ) : isAddressesRoute ? (
-        <AddressBook
+        <Profile
           user={user}
+          initialTab="addresses"
           onRequireAuth={() => setIsAuthOpen(true)}
         />
       ) : (

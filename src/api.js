@@ -182,4 +182,13 @@ export const api = {
     }),
     getMyOrders: () => request('/api/orders/my-orders', { authenticated: true }),
     getMyOrder: (orderId) => request(`/api/orders/my-orders/${orderId}`, { authenticated: true }),
+
+    // Order Reviews APIs
+    createOrderReview: (orderId, reviewData) => request(`/api/orders/${orderId}/reviews`, {
+        method: 'POST',
+        body: reviewData,
+        authenticated: true,
+    }),
+    getOrderReviews: (orderId) => request(`/api/orders/${orderId}/reviews`, { authenticated: true }),
+    getMyReviews: () => request('/api/orders/reviews/my', { authenticated: true }),
 };
