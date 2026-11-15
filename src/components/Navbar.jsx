@@ -14,6 +14,8 @@ export default function Navbar({
   onOpenCart,
   isAuthOpen,
   setIsAuthOpen,
+  onLoginSuccess,
+  onLogout,
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -35,6 +37,7 @@ export default function Navbar({
     setUser?.(null);
     setUserDropdownOpen(false);
     setMobileMenuOpen(false);
+    onLogout?.();
   };
 
   const handleScrollTo = (id) => {
@@ -284,7 +287,13 @@ export default function Navbar({
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={(loggedInUser) => setUser?.(loggedInUser)}
+        onLoginSuccess={(loggedInUser) => {
+          if (onLoginSuccess) {
+            onLoginSuccess(loggedInUser);
+          } else {
+            setUser?.(loggedInUser);
+          }
+        }}
       />
     </>
   );

@@ -143,6 +143,11 @@ export const api = {
         authenticated: true,
     }),
     getCartCount: () => request('/api/cart/count', { authenticated: true }),
+    syncCart: (items) => request('/api/cart/sync', {
+        method: 'POST',
+        body: { items },
+        authenticated: true,
+    }),
 
     // Addresses APIs
     getAddresses: () => request('/api/addresses', { authenticated: true }),
@@ -170,6 +175,10 @@ export const api = {
         method: 'POST',
         body: payload,
         authenticated: true,
+    }),
+    guestCheckout: (payload) => request('/api/orders/guest-checkout', {
+        method: 'POST',
+        body: payload,
     }),
     getMyOrders: () => request('/api/orders/my-orders', { authenticated: true }),
     getMyOrder: (orderId) => request(`/api/orders/my-orders/${orderId}`, { authenticated: true }),

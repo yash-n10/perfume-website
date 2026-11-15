@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, ArrowUpRight, ShoppingBag, Check } from 'lucide-react';
 import { api, getAccessToken } from '../api';
+import { addToGuestCart } from '../utils/cartManager';
 
 const defaultProducts = [
   {
@@ -89,18 +90,13 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
   const findProductId = (productName) => {
     const match = backendProducts.find(
       (bp) => bp.product_name.toLowerCase() === productName.toLowerCase() ||
-              bp.product_name.toLowerCase().includes(productName.toLowerCase()) ||
-              productName.toLowerCase().includes(bp.product_name.toLowerCase())
+        bp.product_name.toLowerCase().includes(productName.toLowerCase()) ||
+        productName.toLowerCase().includes(bp.product_name.toLowerCase())
     );
     return match ? match.id : null;
   };
 
   const handleAddToCart = async (product) => {
-    if (!getAccessToken()) {
-      onRequireAuth?.();
-      return;
-    }
-
     setAddingId(product.id || product.name);
     try {
       // Find matching DB ID or fallback to 1
@@ -112,7 +108,21 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
         dbId = 1; // default seed id
       }
 
-      const updatedCart = await api.addToCart(dbId, 1);
+      let updatedCart;
+      if (!getAccessToken()) {
+        // Not logged in: store in session variable
+        updatedCart = addToGuestCart({
+          id: dbId,
+          product_id: dbId,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+        }, 1);
+      } else {
+        // Logged in: store in database
+        updatedCart = await api.addToCart(dbId, 1);
+      }
+
       onCartUpdated?.(updatedCart);
 
       setJustAddedId(product.id || product.name);

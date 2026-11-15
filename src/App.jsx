@@ -13,6 +13,12 @@ import CheckoutPage from './components/CheckoutPage';
 import AddressBook from './components/AddressBook';
 import MyOrders from './components/MyOrders';
 import { api, getAccessToken, clearAccessToken } from './api';
+import {
+  getGuestCart,
+  clearGuestCart,
+  updateGuestCartQuantity,
+  removeFromGuestCart,
+} from './utils/cartManager';
 import './App.css';
 
 export default function App() {
@@ -63,7 +69,8 @@ export default function App() {
   // Fetch current user and cart
   const refreshCart = useCallback(async () => {
     if (!getAccessToken()) {
-      setCart({ items: [], total: 0, count: 0 });
+      const sessionCart = getGuestCart();
+      setCart(sessionCart);
       return;
     }
     try {
@@ -74,8 +81,24 @@ export default function App() {
     }
   }, []);
 
+  // Listen to guest cart changes from sessionStorage
   useEffect(() => {
-    if (!getAccessToken()) return;
+    const handleGuestCartChange = (e) => {
+      if (!getAccessToken()) {
+        setCart(e.detail || getGuestCart());
+      }
+    };
+    window.addEventListener('mohera-guest-cart-change', handleGuestCartChange);
+    return () => window.removeEventListener('mohera-guest-cart-change', handleGuestCartChange);
+  }, []);
+
+  // Initial authentication check & cart population
+  useEffect(() => {
+    if (!getAccessToken()) {
+      const sessionCart = getGuestCart();
+      setCart(sessionCart);
+      return;
+    }
 
     api.currentUser()
       .then((currUser) => {
@@ -85,11 +108,50 @@ export default function App() {
       .catch(() => {
         clearAccessToken();
         setUser(null);
+        setCart(getGuestCart());
       });
   }, [refreshCart]);
 
+  // Handle successful login: merge guest cart into DB and refresh
+  const handleLoginSuccess = useCallback(async (loggedInUser) => {
+    setUser(loggedInUser);
+    const guestCart = getGuestCart();
+    if (guestCart && guestCart.items && guestCart.items.length > 0) {
+      try {
+        const syncItems = guestCart.items.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+        }));
+        const mergedCart = await api.syncCart(syncItems);
+        clearGuestCart();
+        setCart(mergedCart);
+      } catch (err) {
+        console.warn('Failed to sync guest cart on login:', err);
+        clearGuestCart();
+        const dbCart = await api.getCart().catch(() => null);
+        if (dbCart) setCart(dbCart);
+      }
+    } else {
+      const dbCart = await api.getCart().catch(() => null);
+      if (dbCart) setCart(dbCart);
+    }
+  }, []);
+
+  // Handle user logout
+  const handleLogout = useCallback(() => {
+    clearAccessToken();
+    setUser(null);
+    setCart(getGuestCart());
+  }, []);
+
   // Cart operations
   const handleUpdateCartQuantity = async (itemId, newQty) => {
+    if (!getAccessToken()) {
+      const updated = updateGuestCartQuantity(itemId, newQty);
+      setCart(updated);
+      return;
+    }
+
     setIsCartLoading(true);
     try {
       const updated = await api.updateCartItem(itemId, newQty);
@@ -102,6 +164,12 @@ export default function App() {
   };
 
   const handleRemoveCartItem = async (itemId) => {
+    if (!getAccessToken()) {
+      const updated = removeFromGuestCart(itemId);
+      setCart(updated);
+      return;
+    }
+
     setIsCartLoading(true);
     try {
       const updated = await api.removeCartItem(itemId);
@@ -166,15 +234,11 @@ export default function App() {
         user={user}
         setUser={setUser}
         cartCount={cart?.count || 0}
-        onOpenCart={() => {
-          if (!getAccessToken()) {
-            setIsAuthOpen(true);
-          } else {
-            setIsCartOpen(true);
-          }
-        }}
+        onOpenCart={() => setIsCartOpen(true)}
         isAuthOpen={isAuthOpen}
         setIsAuthOpen={setIsAuthOpen}
+        onLoginSuccess={handleLoginSuccess}
+        onLogout={handleLogout}
       />
 
       {/* Global Slide-In Cart Drawer */}

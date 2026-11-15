@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft, Check, ShieldCheck, MapPin, CreditCard,
   ShoppingBag, Plus, Trash2, CheckCircle2, Download,
-  Truck, ArrowRight, Sparkles, AlertCircle
+  Truck, ArrowRight, Sparkles, AlertCircle, UserCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api, getAccessToken } from '../api';
 import { downloadInvoicePDF } from '../utils/invoiceGenerator';
+import {
+  getGuestCart,
+  updateGuestCartQuantity,
+  removeFromGuestCart,
+  clearGuestCart,
+} from '../utils/cartManager';
 import logo from '/logo_white.png';
 
 export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
@@ -20,12 +26,15 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // New address form modal / toggle
+  const isLoggedIn = Boolean(getAccessToken());
+
+  // New address / guest address form
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
     label: 'Home',
     full_name: user?.name || '',
     phone: user?.phone || '',
+    email: user?.email || '',
     address_line1: '',
     address_line2: '',
     city: '',
@@ -34,29 +43,32 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
     is_default: false,
   });
 
-  // Load cart and addresses on mount
+  // Load cart and addresses on mount or when user changes
   useEffect(() => {
-    if (!getAccessToken()) {
-      setIsLoading(false);
-      onRequireAuth?.();
-      return;
-    }
-
     const loadInitialData = async () => {
       setIsLoading(true);
+      setErrorMessage(null);
       try {
-        const [cartData, addressList] = await Promise.all([
-          api.getCart().catch(() => null),
-          api.getAddresses().catch(() => []),
-        ]);
-        setCart(cartData);
-        setAddresses(addressList || []);
+        if (isLoggedIn) {
+          const [cartData, addressList] = await Promise.all([
+            api.getCart().catch(() => null),
+            api.getAddresses().catch(() => []),
+          ]);
+          setCart(cartData);
+          setAddresses(addressList || []);
 
-        // Pick default address or first address
-        if (addressList && addressList.length > 0) {
-          const def = addressList.find((a) => a.is_default) || addressList[0];
-          setSelectedAddressId(def.id);
+          if (addressList && addressList.length > 0) {
+            const def = addressList.find((a) => a.is_default) || addressList[0];
+            setSelectedAddressId(def.id);
+            setShowNewAddressForm(false);
+          } else {
+            setShowNewAddressForm(true);
+          }
         } else {
+          // Guest Cart from Session
+          const sessionCart = getGuestCart();
+          setCart(sessionCart);
+          setAddresses([]);
           setShowNewAddressForm(true);
         }
       } catch (err) {
@@ -67,13 +79,19 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
     };
 
     loadInitialData();
-  }, [user]);
+  }, [user, isLoggedIn]);
 
   const handleUpdateQuantity = async (itemId, qty) => {
     try {
-      const updated = await api.updateCartItem(itemId, qty);
-      setCart(updated);
-      onCartUpdated?.(updated);
+      if (isLoggedIn) {
+        const updated = await api.updateCartItem(itemId, qty);
+        setCart(updated);
+        onCartUpdated?.(updated);
+      } else {
+        const updated = updateGuestCartQuantity(itemId, qty);
+        setCart(updated);
+        onCartUpdated?.(updated);
+      }
     } catch (err) {
       setErrorMessage(err.message);
     }
@@ -81,9 +99,15 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
 
   const handleRemoveItem = async (itemId) => {
     try {
-      const updated = await api.removeCartItem(itemId);
-      setCart(updated);
-      onCartUpdated?.(updated);
+      if (isLoggedIn) {
+        const updated = await api.removeCartItem(itemId);
+        setCart(updated);
+        onCartUpdated?.(updated);
+      } else {
+        const updated = removeFromGuestCart(itemId);
+        setCart(updated);
+        onCartUpdated?.(updated);
+      }
     } catch (err) {
       setErrorMessage(err.message);
     }
@@ -96,6 +120,13 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
       return;
     }
 
+    if (!isLoggedIn) {
+      // Guest: address is stored in state, ready for payment step
+      setErrorMessage(null);
+      setStep(3);
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
@@ -104,17 +135,7 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
       setAddresses(updatedList);
       setSelectedAddressId(saved.id);
       setShowNewAddressForm(false);
-      setNewAddress({
-        label: 'Home',
-        full_name: user?.name || '',
-        phone: user?.phone || '',
-        address_line1: '',
-        address_line2: '',
-        city: '',
-        state: '',
-        pincode: '',
-        is_default: false,
-      });
+      setStep(3);
     } catch (err) {
       setErrorMessage(err.message || 'Could not save address.');
     } finally {
@@ -128,31 +149,68 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
       return;
     }
 
-    if (!selectedAddressId && !showNewAddressForm) {
-      setErrorMessage('Please select or add a delivery address.');
-      setStep(2);
-      return;
-    }
-
     setIsSubmitting(true);
     setErrorMessage(null);
-    try {
-      let payload = {
-        payment_mode: paymentMode,
-      };
 
-      if (selectedAddressId) {
-        payload.address_id = selectedAddressId;
-      } else if (showNewAddressForm) {
-        payload.address = newAddress;
+    try {
+      let order;
+
+      if (isLoggedIn) {
+        // Authenticated Checkout
+        if (!selectedAddressId && !showNewAddressForm) {
+          setErrorMessage('Please select or add a delivery address.');
+          setStep(2);
+          setIsSubmitting(false);
+          return;
+        }
+
+        const payload = {
+          payment_mode: paymentMode,
+        };
+        if (selectedAddressId) {
+          payload.address_id = selectedAddressId;
+        } else if (showNewAddressForm) {
+          payload.address = newAddress;
+        }
+
+        order = await api.checkout(payload);
+      } else {
+        // Guest Checkout
+        if (!newAddress.full_name || !newAddress.phone || !newAddress.address_line1 || !newAddress.city || !newAddress.state || !newAddress.pincode) {
+          setErrorMessage('Please complete all delivery address fields.');
+          setStep(2);
+          setIsSubmitting(false);
+          return;
+        }
+
+        const guestPayload = {
+          customer_name: newAddress.full_name.trim(),
+          phone: newAddress.phone.trim(),
+          email: newAddress.email ? newAddress.email.trim() : '',
+          address_line1: newAddress.address_line1.trim(),
+          address_line2: newAddress.address_line2 ? newAddress.address_line2.trim() : null,
+          city: newAddress.city.trim(),
+          state: newAddress.state.trim(),
+          pincode: newAddress.pincode.trim(),
+          payment_mode: paymentMode,
+          items: cart.items.map((item) => ({
+            product_id: item.product_id,
+            product_name: item.product_name,
+            quantity: item.quantity,
+            unit_price: item.price,
+            total_price: item.subtotal,
+          })),
+        };
+
+        order = await api.guestCheckout(guestPayload);
+        clearGuestCart();
       }
 
-      const order = await api.checkout(payload);
       setPlacedOrder(order);
       setStep(4);
       onCartUpdated?.({ items: [], total: 0, count: 0 });
 
-      // Trigger Celebration Confetti
+      // Celebration Confetti
       try {
         confetti({
           particleCount: 120,
@@ -161,7 +219,7 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
           colors: ['#d4af37', '#e8c86a', '#9e7415', '#ffffff'],
         });
       } catch {
-        // ignore if confetti fails
+        // ignore
       }
     } catch (err) {
       setErrorMessage(err.message || 'Failed to place order. Please try again.');
@@ -183,28 +241,6 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
       <div className="checkout-loading-screen">
         <div className="checkout-spinner" />
         <p className="font-royal gold-gradient-text">Preparing your bespoke checkout...</p>
-      </div>
-    );
-  }
-
-  // Not logged in state
-  if (!getAccessToken()) {
-    return (
-      <div className="checkout-page-container">
-        <div className="checkout-auth-guard luxury-glass">
-          <ShoppingBag size={48} className="gold-icon" />
-          <h2 className="font-royal">Sign in to Checkout</h2>
-          <p className="font-poetic">
-            Please log in or create an account to securely complete your fragrance order.
-          </p>
-          <button
-            type="button"
-            onClick={onRequireAuth}
-            className="btn-gold font-royal"
-          >
-            Login / Register
-          </button>
-        </div>
       </div>
     );
   }
@@ -239,6 +275,25 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
         </div>
       </header>
 
+      {/* Guest Mode Callout */}
+      {!isLoggedIn && step < 4 && (
+        <div className="checkout-guest-banner luxury-glass">
+          <div className="guest-banner-left">
+            <UserCheck size={18} className="gold-icon" />
+            <span className="font-poetic">
+              Checking out as a <strong>Guest</strong>. Want to save your delivery addresses and track orders?
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={onRequireAuth}
+            className="guest-signin-btn font-royal"
+          >
+            Log In / Sign Up
+          </button>
+        </div>
+      )}
+
       {/* Progress Steps (if not confirmed) */}
       {step < 4 && (
         <div className="checkout-progress-bar">
@@ -268,7 +323,7 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
 
           <div
             className={`progress-step ${step >= 3 ? 'active' : ''}`}
-            onClick={() => (selectedAddressId || showNewAddressForm) && setStep(3)}
+            onClick={() => ((isLoggedIn && selectedAddressId) || showNewAddressForm) && setStep(3)}
           >
             <div className="step-circle font-royal">3</div>
             <span className="step-title font-royal">Payment</span>
@@ -374,7 +429,7 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
                         onClick={() => setStep(2)}
                         className="btn-gold font-royal"
                       >
-                        <span>Continue to Address Selection</span>
+                        <span>Continue to Address Details</span>
                         <ArrowRight size={16} />
                       </button>
                     </div>
@@ -388,47 +443,51 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
               <div className="checkout-step-card luxury-glass">
                 <div className="step-header">
                   <MapPin size={20} className="gold-icon" />
-                  <h2 className="step-heading font-royal">Select Delivery Address</h2>
+                  <h2 className="step-heading font-royal">
+                    {isLoggedIn ? 'Select Delivery Address' : 'Guest Delivery Address'}
+                  </h2>
                 </div>
 
-                {/* List Existing Addresses */}
-                <div className="addresses-selection-grid">
-                  {addresses.map((addr) => {
-                    const isSelected = selectedAddressId === addr.id;
-                    return (
-                      <div
-                        key={addr.id}
-                        className={`address-select-card ${isSelected ? 'selected' : ''}`}
-                        onClick={() => {
-                          setSelectedAddressId(addr.id);
-                          setShowNewAddressForm(false);
-                        }}
-                      >
-                        <div className="address-select-header">
-                          <span className="address-label-badge font-royal">{addr.label}</span>
-                          {addr.is_default && (
-                            <span className="address-default-badge font-royal">Default</span>
-                          )}
-                          <div className={`address-radio-circle ${isSelected ? 'checked' : ''}`}>
-                            {isSelected && <Check size={12} />}
+                {/* List Existing Addresses (for Logged In Users) */}
+                {isLoggedIn && addresses.length > 0 && (
+                  <div className="addresses-selection-grid">
+                    {addresses.map((addr) => {
+                      const isSelected = selectedAddressId === addr.id;
+                      return (
+                        <div
+                          key={addr.id}
+                          className={`address-select-card ${isSelected ? 'selected' : ''}`}
+                          onClick={() => {
+                            setSelectedAddressId(addr.id);
+                            setShowNewAddressForm(false);
+                          }}
+                        >
+                          <div className="address-select-header">
+                            <span className="address-label-badge font-royal">{addr.label}</span>
+                            {addr.is_default && (
+                              <span className="address-default-badge font-royal">Default</span>
+                            )}
+                            <div className={`address-radio-circle ${isSelected ? 'checked' : ''}`}>
+                              {isSelected && <Check size={12} />}
+                            </div>
                           </div>
+
+                          <h4 className="address-recipient font-royal">{addr.full_name}</h4>
+                          <p className="address-text">
+                            {addr.address_line1}
+                            {addr.address_line2 ? `, ${addr.address_line2}` : ''}
+                            <br />
+                            {addr.city}, {addr.state} - <strong>{addr.pincode}</strong>
+                          </p>
+                          <p className="address-phone font-royal">Phone: {addr.phone}</p>
                         </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-                        <h4 className="address-recipient font-royal">{addr.full_name}</h4>
-                        <p className="address-text">
-                          {addr.address_line1}
-                          {addr.address_line2 ? `, ${addr.address_line2}` : ''}
-                          <br />
-                          {addr.city}, {addr.state} - <strong>{addr.pincode}</strong>
-                        </p>
-                        <p className="address-phone font-royal">Phone: {addr.phone}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Add New Address Button */}
-                {!showNewAddressForm && (
+                {/* Add New Address Button (for Logged In Users) */}
+                {isLoggedIn && addresses.length > 0 && !showNewAddressForm && (
                   <button
                     type="button"
                     onClick={() => {
@@ -442,12 +501,14 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
                   </button>
                 )}
 
-                {/* Inline New Address Form */}
+                {/* Inline New Address / Guest Address Form */}
                 {showNewAddressForm && (
                   <form onSubmit={handleSaveAddress} className="checkout-address-form">
                     <div className="form-subheading-row">
-                      <h3 className="font-royal">New Delivery Details</h3>
-                      {addresses.length > 0 && (
+                      <h3 className="font-royal">
+                        {isLoggedIn ? 'New Delivery Destination' : 'Recipient & Shipping Details'}
+                      </h3>
+                      {isLoggedIn && addresses.length > 0 && (
                         <button
                           type="button"
                           onClick={() => {
@@ -463,35 +524,19 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
 
                     <div className="form-grid-row">
                       <div className="form-group">
-                        <label className="font-royal">Address Label</label>
-                        <select
-                          value={newAddress.label}
-                          onChange={(e) => setNewAddress({ ...newAddress, label: e.target.value })}
-                          className="checkout-input font-royal"
-                        >
-                          <option value="Home">Home</option>
-                          <option value="Office">Office</option>
-                          <option value="Bespoke">Bespoke / Studio</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-
-                      <div className="form-group">
-                        <label className="font-royal">Full Name *</label>
+                        <label className="font-royal">Recipient Full Name *</label>
                         <input
                           type="text"
                           required
-                          placeholder="Recipient Full Name"
+                          placeholder="Your full name"
                           value={newAddress.full_name}
                           onChange={(e) => setNewAddress({ ...newAddress, full_name: e.target.value })}
                           className="checkout-input"
                         />
                       </div>
-                    </div>
 
-                    <div className="form-grid-row">
                       <div className="form-group">
-                        <label className="font-royal">Phone Number *</label>
+                        <label className="font-royal">Contact Phone *</label>
                         <input
                           type="tel"
                           required
@@ -501,18 +546,18 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
                           className="checkout-input"
                         />
                       </div>
+                    </div>
 
-                      <div className="form-group">
-                        <label className="font-royal">Pincode *</label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="6-digit PIN code"
-                          value={newAddress.pincode}
-                          onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
-                          className="checkout-input"
-                        />
-                      </div>
+                    {/* Email field (especially helpful for guest receipts) */}
+                    <div className="form-group">
+                      <label className="font-royal">Email Address (for order receipt & invoice)</label>
+                      <input
+                        type="email"
+                        placeholder="name@example.com"
+                        value={newAddress.email || ''}
+                        onChange={(e) => setNewAddress({ ...newAddress, email: e.target.value })}
+                        className="checkout-input"
+                      />
                     </div>
 
                     <div className="form-group">
@@ -531,7 +576,7 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
                       <label className="font-royal">Address Line 2 (Area, Landmark)</label>
                       <input
                         type="text"
-                        placeholder="Landmark or locality (optional)"
+                        placeholder="Landmark, locality or area"
                         value={newAddress.address_line2}
                         onChange={(e) => setNewAddress({ ...newAddress, address_line2: e.target.value })}
                         className="checkout-input"
@@ -564,21 +609,53 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
                       </div>
                     </div>
 
-                    <label className="checkbox-row font-royal">
-                      <input
-                        type="checkbox"
-                        checked={newAddress.is_default}
-                        onChange={(e) => setNewAddress({ ...newAddress, is_default: e.target.checked })}
-                      />
-                      <span>Set as default delivery address</span>
-                    </label>
+                    <div className="form-grid-row">
+                      <div className="form-group">
+                        <label className="font-royal">PIN Code *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="6-digit postal code"
+                          value={newAddress.pincode}
+                          onChange={(e) => setNewAddress({ ...newAddress, pincode: e.target.value })}
+                          className="checkout-input"
+                        />
+                      </div>
+
+                      {isLoggedIn && (
+                        <div className="form-group">
+                          <label className="font-royal">Address Label</label>
+                          <select
+                            value={newAddress.label}
+                            onChange={(e) => setNewAddress({ ...newAddress, label: e.target.value })}
+                            className="checkout-input font-royal"
+                          >
+                            <option value="Home">Home</option>
+                            <option value="Office">Office</option>
+                            <option value="Bespoke">Bespoke / Studio</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    {isLoggedIn && (
+                      <label className="checkbox-row font-royal">
+                        <input
+                          type="checkbox"
+                          checked={newAddress.is_default}
+                          onChange={(e) => setNewAddress({ ...newAddress, is_default: e.target.checked })}
+                        />
+                        <span>Set as default delivery address</span>
+                      </label>
+                    )}
 
                     <button
                       type="submit"
                       disabled={isSubmitting}
                       className="btn-gold font-royal"
                     >
-                      {isSubmitting ? 'Saving Address...' : 'Save & Select Address'}
+                      {isSubmitting ? 'Saving Address...' : 'Save & Proceed to Payment'}
                     </button>
                   </form>
                 )}
@@ -594,7 +671,7 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
 
                   <button
                     type="button"
-                    disabled={!selectedAddressId && !showNewAddressForm}
+                    disabled={!selectedAddressId && (!newAddress.full_name || !newAddress.phone || !newAddress.address_line1 || !newAddress.city || !newAddress.pincode)}
                     onClick={() => setStep(3)}
                     className="btn-gold font-royal"
                   >
@@ -696,27 +773,33 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
                   </label>
                 </div>
 
-                {/* Selected Address Preview */}
-                {selectedAddress && (
-                  <div className="payment-delivery-summary">
-                    <div className="delivery-summary-header font-royal">
-                      <Truck size={16} className="gold-icon" />
-                      <span>Delivering to</span>
-                      <button
-                        type="button"
-                        onClick={() => setStep(2)}
-                        className="change-address-btn font-royal"
-                      >
-                        Change
-                      </button>
-                    </div>
+                {/* Selected / Guest Address Preview */}
+                <div className="payment-delivery-summary">
+                  <div className="delivery-summary-header font-royal">
+                    <Truck size={16} className="gold-icon" />
+                    <span>Delivering to</span>
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="change-address-btn font-royal"
+                    >
+                      Change
+                    </button>
+                  </div>
+                  {isLoggedIn && selectedAddress ? (
                     <p className="delivery-summary-text">
                       <strong>{selectedAddress.full_name}</strong> ({selectedAddress.phone})
                       <br />
                       {selectedAddress.address_line1}, {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pincode}
                     </p>
-                  </div>
-                )}
+                  ) : (
+                    <p className="delivery-summary-text">
+                      <strong>{newAddress.full_name}</strong> ({newAddress.phone})
+                      <br />
+                      {newAddress.address_line1}{newAddress.address_line2 ? `, ${newAddress.address_line2}` : ''}, {newAddress.city}, {newAddress.state} - {newAddress.pincode}
+                    </p>
+                  )}
+                </div>
 
                 <div className="checkout-step-actions">
                   <button
@@ -809,12 +892,14 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
             <CheckCircle2 size={54} className="confirm-check-icon" />
           </div>
 
-          <span className="confirm-eyebrow font-royal">Order Placed Successfully</span>
+          <span className="confirm-eyebrow font-royal">
+            {isLoggedIn ? 'Order Placed Successfully' : 'Guest Order Placed Successfully'}
+          </span>
           <h2 className="confirm-title font-royal">
             Thank you, <span className="gold-gradient-text">{placedOrder?.customer_name}</span>
           </h2>
           <p className="confirm-desc font-poetic">
-            Your signature MOHERA fragrance has been booked. A confirmation email and receipt have been dispatched.
+            Your signature MOHERA fragrance has been booked. A confirmation receipt has been generated.
           </p>
 
           <div className="confirm-order-badge font-royal">
@@ -842,7 +927,7 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
             <div className="confirm-detail-card">
               <span className="detail-card-label font-royal">Contact Details</span>
               <p className="detail-card-val font-royal">
-                {placedOrder?.phone} <br /> {placedOrder?.email}
+                {placedOrder?.phone} <br /> {placedOrder?.email || 'N/A'}
               </p>
             </div>
           </div>
@@ -858,14 +943,25 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
               <span>Download Tax Invoice</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => { window.location.hash = '#/orders'; }}
-              className="btn-gold font-royal"
-            >
-              <span>View Order in Profile</span>
-              <ArrowRight size={16} />
-            </button>
+            {isLoggedIn ? (
+              <button
+                type="button"
+                onClick={() => { window.location.hash = '#/orders'; }}
+                className="btn-gold font-royal"
+              >
+                <span>View Order in Profile</span>
+                <ArrowRight size={16} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onRequireAuth}
+                className="btn-gold font-royal"
+              >
+                <span>Sign Up to Track Orders</span>
+                <ArrowRight size={16} />
+              </button>
+            )}
 
             <button
               type="button"
