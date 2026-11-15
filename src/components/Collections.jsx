@@ -88,6 +88,10 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
   }, []);
 
   const findProductId = (product) => {
+    // If product already has a valid numeric ID, use it directly (1-13)
+    if (typeof product.id === 'number' && product.id > 0) {
+      return product.id;
+    }
     const pName = (product.name || '').toLowerCase();
     if (backendProducts && backendProducts.length > 0) {
       const match = backendProducts.find((bp) => {
@@ -96,10 +100,7 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
       });
       if (match) return match.id;
     }
-    if (typeof product.id === 'number') {
-      return product.id;
-    }
-    return 1;
+    return product.id || 1;
   };
 
   const handleAddToCart = async (product) => {
