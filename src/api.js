@@ -121,4 +121,56 @@ export const api = {
         const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
         return fetch(`${API_BASE_URL}/api/orders/${orderId}`, { headers }).then(r => r.json());
     },
+
+    // Cart APIs
+    getCart: () => request('/api/cart', { authenticated: true }),
+    addToCart: (productId, quantity = 1) => request('/api/cart', {
+        method: 'POST',
+        body: { product_id: productId, quantity },
+        authenticated: true,
+    }),
+    updateCartItem: (itemId, quantity) => request(`/api/cart/${itemId}`, {
+        method: 'PATCH',
+        body: { quantity },
+        authenticated: true,
+    }),
+    removeCartItem: (itemId) => request(`/api/cart/${itemId}`, {
+        method: 'DELETE',
+        authenticated: true,
+    }),
+    clearCart: () => request('/api/cart', {
+        method: 'DELETE',
+        authenticated: true,
+    }),
+    getCartCount: () => request('/api/cart/count', { authenticated: true }),
+
+    // Addresses APIs
+    getAddresses: () => request('/api/addresses', { authenticated: true }),
+    addAddress: (addressData) => request('/api/addresses', {
+        method: 'POST',
+        body: addressData,
+        authenticated: true,
+    }),
+    updateAddress: (addressId, addressData) => request(`/api/addresses/${addressId}`, {
+        method: 'PATCH',
+        body: addressData,
+        authenticated: true,
+    }),
+    deleteAddress: (addressId) => request(`/api/addresses/${addressId}`, {
+        method: 'DELETE',
+        authenticated: true,
+    }),
+    setDefaultAddress: (addressId) => request(`/api/addresses/${addressId}/default`, {
+        method: 'PATCH',
+        authenticated: true,
+    }),
+
+    // Authenticated Checkout & User Orders
+    checkout: (payload) => request('/api/orders/checkout', {
+        method: 'POST',
+        body: payload,
+        authenticated: true,
+    }),
+    getMyOrders: () => request('/api/orders/my-orders', { authenticated: true }),
+    getMyOrder: (orderId) => request(`/api/orders/my-orders/${orderId}`, { authenticated: true }),
 };

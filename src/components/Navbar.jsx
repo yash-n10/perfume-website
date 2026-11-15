@@ -1,42 +1,63 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowUpRight, Menu, X, User, LogOut } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  ArrowUpRight, Menu, X, User, LogOut,
+  ShoppingBag, Package, MapPin, ChevronDown
+} from 'lucide-react';
 import logo from '/logo_white.png';
 import AuthModal from './AuthModal';
-import { api, clearAccessToken, getAccessToken } from '../api';
+import { clearAccessToken } from '../api';
 
-const GOOGLE_FORM_URL = "https://forms.google.com";
-
-export default function Navbar() {
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [user, setUser] = useState(null);
+export default function Navbar({
+  user,
+  setUser,
+  cartCount = 0,
+  onOpenCart,
+  isAuthOpen,
+  setIsAuthOpen,
+}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
+  // Close user dropdown if clicked outside
   useEffect(() => {
-    if (!getAccessToken()) return undefined;
-
-    let isActive = true;
-    api.currentUser()
-      .then((currentUser) => {
-        if (isActive) setUser(currentUser);
-      })
-      .catch(() => clearAccessToken());
-
-    return () => {
-      isActive = false;
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setUserDropdownOpen(false);
+      }
     };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogout = () => {
     clearAccessToken();
-    setUser(null);
+    setUser?.(null);
+    setUserDropdownOpen(false);
+    setMobileMenuOpen(false);
   };
 
   const handleScrollTo = (id) => {
     setMobileMenuOpen(false);
+    // If not on main page, navigate to #/ then scroll
+    if (window.location.hash && window.location.hash !== '#/' && window.location.hash !== '#') {
+      window.location.hash = '#/';
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return;
+    }
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const navigateTo = (hash) => {
+    setUserDropdownOpen(false);
+    setMobileMenuOpen(false);
+    window.location.hash = hash;
   };
 
   return (
@@ -44,7 +65,7 @@ export default function Navbar() {
       <header className="navbar-container">
         <div className="navbar-content navbar-simple">
           {/* Logo & Brand Wordmark */}
-          <a href="#" className="brand-wordmark">
+          <a href="#/" className="brand-wordmark">
             <img src={logo} alt="MOHERA" className="navbar-logo-img" />
           </a>
 
@@ -55,7 +76,7 @@ export default function Navbar() {
               onClick={() => handleScrollTo('collections-section')}
               className="nav-link-btn font-royal"
             >
-              Products
+              Fragrances
             </button>
 
             <button
@@ -67,17 +88,58 @@ export default function Navbar() {
             </button>
 
             {user ? (
-              <div className="nav-user-pill">
-                <User size={13} className="gold-icon" />
-                <span className="nav-user-name font-royal">{user.name}</span>
+              <div className="nav-user-dropdown-wrapper" ref={dropdownRef}>
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  className="nav-logout-btn"
-                  title="Logout"
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="nav-user-pill-btn font-royal"
+                  aria-expanded={userDropdownOpen}
                 >
-                  <LogOut size={12} />
+                  <User size={13} className="gold-icon" />
+                  <span className="nav-user-name">{user.name}</span>
+                  <ChevronDown size={13} className={`gold-icon dropdown-chevron ${userDropdownOpen ? 'open' : ''}`} />
                 </button>
+
+                {/* Dropdown Menu */}
+                {userDropdownOpen && (
+                  <div className="nav-user-dropdown-menu luxury-glass">
+                    <div className="dropdown-user-header">
+                      <span className="dropdown-name font-royal">{user.name}</span>
+                      <span className="dropdown-email font-poetic">{user.email}</span>
+                    </div>
+
+                    <div className="dropdown-divider" />
+
+                    <button
+                      type="button"
+                      onClick={() => navigateTo('#/orders')}
+                      className="dropdown-menu-item font-royal"
+                    >
+                      <Package size={14} className="gold-icon" />
+                      <span>My Orders</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => navigateTo('#/addresses')}
+                      className="dropdown-menu-item font-royal"
+                    >
+                      <MapPin size={14} className="gold-icon" />
+                      <span>Address Book</span>
+                    </button>
+
+                    <div className="dropdown-divider" />
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="dropdown-menu-item dropdown-logout font-royal"
+                    >
+                      <LogOut size={14} />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <button
@@ -90,8 +152,24 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* Action button & Mobile Hamburger Toggle */}
+          {/* Action buttons & Mobile Hamburger Toggle */}
           <div className="navbar-actions">
+            {/* Cart Button with Count Badge */}
+            <button
+              type="button"
+              onClick={onOpenCart}
+              className="nav-cart-btn"
+              aria-label="Open Cart"
+              title="View Cart"
+            >
+              <ShoppingBag size={20} className="gold-icon" />
+              {cartCount > 0 && (
+                <span className="nav-cart-badge font-royal">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </button>
+
             <button
               type="button"
               onClick={() => handleScrollTo('enquiry-section')}
@@ -121,7 +199,7 @@ export default function Navbar() {
               onClick={() => handleScrollTo('collections-section')}
               className="mobile-nav-link font-royal"
             >
-              Products
+              Fragrances
             </button>
             <button
               type="button"
@@ -138,19 +216,53 @@ export default function Navbar() {
               Enquiry
             </button>
 
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenCart?.();
+              }}
+              className="mobile-nav-link mobile-cart-link font-royal"
+            >
+              <ShoppingBag size={16} className="gold-icon" />
+              <span>Cart ({cartCount})</span>
+            </button>
+
             {user ? (
-              <div className="mobile-user-row">
-                <span className="font-royal">Signed in as <strong>{user.name}</strong></span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleLogout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="mobile-logout-btn font-royal"
-                >
-                  Sign Out
-                </button>
+              <div className="mobile-user-section">
+                <div className="mobile-user-header">
+                  <span className="font-royal">Signed in as <strong>{user.name}</strong></span>
+                  <span className="mobile-user-email font-poetic">{user.email}</span>
+                </div>
+
+                <div className="mobile-user-links">
+                  <button
+                    type="button"
+                    onClick={() => navigateTo('#/orders')}
+                    className="mobile-user-item font-royal"
+                  >
+                    <Package size={14} className="gold-icon" />
+                    <span>My Orders</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigateTo('#/addresses')}
+                    className="mobile-user-item font-royal"
+                  >
+                    <MapPin size={14} className="gold-icon" />
+                    <span>Address Book</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="mobile-logout-btn font-royal"
+                  >
+                    <LogOut size={14} />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <button
@@ -172,7 +284,7 @@ export default function Navbar() {
       <AuthModal
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={(loggedInUser) => setUser(loggedInUser)}
+        onLoginSuccess={(loggedInUser) => setUser?.(loggedInUser)}
       />
     </>
   );
