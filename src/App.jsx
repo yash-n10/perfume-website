@@ -192,6 +192,10 @@ export default function App() {
     routeInfo.hash === '#/checkout' ||
     routeInfo.hash === '#checkout';
 
+  const isPaymentRoute =
+    routeInfo.hash === '#/payment' ||
+    routeInfo.hash === '#payment';
+
   const isOrdersRoute =
     routeInfo.hash === '#/orders' ||
     routeInfo.hash === '#orders' ||
@@ -256,9 +260,10 @@ export default function App() {
       />
 
       {/* MAIN VIEWPORT ROUTER */}
-      {isCheckoutRoute ? (
+      {isCheckoutRoute || isPaymentRoute ? (
         <CheckoutPage
           user={user}
+          initialStep={isPaymentRoute ? 3 : 1}
           onRequireAuth={() => setIsAuthOpen(true)}
           onCartUpdated={(newCart) => setCart(newCart)}
         />

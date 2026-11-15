@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   ArrowUpRight, Menu, X, User, LogOut,
-  ShoppingBag, Package, MapPin, ChevronDown
+  ShoppingBag, Package, MapPin, ChevronDown, CreditCard
 } from 'lucide-react';
 import logo from '/logo_white.png';
 import AuthModal from './AuthModal';
@@ -131,6 +131,24 @@ export default function Navbar({
                       <span>Address Book</span>
                     </button>
 
+                    <button
+                      type="button"
+                      onClick={() => navigateTo('#/checkout')}
+                      className="dropdown-menu-item font-royal"
+                    >
+                      <ShoppingBag size={14} className="gold-icon" />
+                      <span>Checkout</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => navigateTo('#/payment')}
+                      className="dropdown-menu-item font-royal"
+                    >
+                      <CreditCard size={14} className="gold-icon" />
+                      <span>Payment</span>
+                    </button>
+
                     <div className="dropdown-divider" />
 
                     <button
@@ -217,6 +235,22 @@ export default function Navbar({
               className="mobile-nav-link font-royal"
             >
               Enquiry
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigateTo('#/checkout')}
+              className="mobile-nav-link font-royal"
+            >
+              Checkout
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigateTo('#/payment')}
+              className="mobile-nav-link font-royal"
+            >
+              Payment
             </button>
 
             <button

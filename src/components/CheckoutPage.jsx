@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft, Check, ShieldCheck, MapPin, CreditCard,
   ShoppingBag, Plus, Trash2, CheckCircle2, Download,
-  Truck, ArrowRight, Sparkles, AlertCircle, UserCheck
+  Truck, ArrowRight, Sparkles, AlertCircle, UserCheck,
+  Smartphone, Lock, Building
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api, getAccessToken } from '../api';
@@ -15,8 +16,8 @@ import {
 } from '../utils/cartManager';
 import logo from '/logo_white.png';
 
-export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
-  const [step, setStep] = useState(1); // 1: Cart Review, 2: Address, 3: Payment, 4: Confirmation
+export default function CheckoutPage({ user, onRequireAuth, onCartUpdated, initialStep = 1 }) {
+  const [step, setStep] = useState(initialStep); // 1: Cart Review, 2: Address, 3: Payment, 4: Confirmation
   const [cart, setCart] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -25,6 +26,17 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+
+  // Interactive Payment States
+  const [upiId, setUpiId] = useState('');
+  const [upiVerified, setUpiVerified] = useState(false);
+  const [cardData, setCardData] = useState({
+    number: '',
+    name: user?.name || '',
+    expiry: '',
+    cvv: '',
+  });
+  const [selectedBank, setSelectedBank] = useState('HDFC Bank');
 
   const isLoggedIn = Boolean(getAccessToken());
 
@@ -80,6 +92,12 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
 
     loadInitialData();
   }, [user, isLoggedIn]);
+
+  useEffect(() => {
+    if (initialStep) {
+      setStep(initialStep);
+    }
+  }, [initialStep]);
 
   const handleUpdateQuantity = async (itemId, qty) => {
     try {
@@ -441,11 +459,25 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
             {/* STEP 2: ADDRESS SELECTION */}
             {step === 2 && (
               <div className="checkout-step-card luxury-glass">
-                <div className="step-header">
-                  <MapPin size={20} className="gold-icon" />
-                  <h2 className="step-heading font-royal">
-                    {isLoggedIn ? 'Select Delivery Address' : 'Guest Delivery Address'}
-                  </h2>
+                <div className="step-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <MapPin size={20} className="gold-icon" />
+                    <h2 className="step-heading font-royal" style={{ margin: 0 }}>
+                      {isLoggedIn ? 'Select Delivery Address' : 'Guest Delivery Address'}
+                    </h2>
+                  </div>
+                  {isLoggedIn && (
+                    <button
+                      type="button"
+                      onClick={() => { window.location.hash = '#/addresses'; }}
+                      className="btn-outline-gold font-royal"
+                      style={{ padding: '6px 14px', fontSize: '0.72rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                      title="Manage your saved addresses in Address Book"
+                    >
+                      <MapPin size={12} />
+                      <span>Address Book</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* List Existing Addresses (for Logged In Users) */}
@@ -687,90 +719,267 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated }) {
               <div className="checkout-step-card luxury-glass">
                 <div className="step-header">
                   <CreditCard size={20} className="gold-icon" />
-                  <h2 className="step-heading font-royal">Payment Mode</h2>
+                  <h2 className="step-heading font-royal">Secure Payment</h2>
                 </div>
 
                 <p className="payment-intro font-poetic">
-                  Choose your preferred payment method. All transactions are securely processed.
+                  Choose your preferred payment method. All transactions are securely processed and 256-bit SSL encrypted.
                 </p>
 
                 <div className="payment-options-list">
                   {/* Option 1: Cash on Delivery */}
-                  <label className={`payment-option-card ${paymentMode === 'Cash on Delivery' ? 'selected' : ''}`}>
-                    <input
-                      type="radio"
-                      name="payment_mode"
-                      value="Cash on Delivery"
-                      checked={paymentMode === 'Cash on Delivery'}
-                      onChange={(e) => setPaymentMode(e.target.value)}
-                    />
-                    <div className="payment-option-info">
-                      <div className="payment-title font-royal">
-                        <span>Cash on Delivery (COD)</span>
-                        <span className="payment-popular-pill font-royal">Recommended</span>
+                  <div className={`payment-option-wrapper ${paymentMode === 'Cash on Delivery' ? 'selected' : ''}`}>
+                    <label className="payment-option-card">
+                      <input
+                        type="radio"
+                        name="payment_mode"
+                        value="Cash on Delivery"
+                        checked={paymentMode === 'Cash on Delivery'}
+                        onChange={(e) => setPaymentMode(e.target.value)}
+                      />
+                      <div className="payment-option-info">
+                        <div className="payment-title font-royal">
+                          <span>Cash on Delivery (COD)</span>
+                          <span className="payment-popular-pill font-royal">Recommended</span>
+                        </div>
+                        <p className="payment-desc font-poetic">
+                          Pay conveniently with cash or UPI directly to the courier upon delivery.
+                        </p>
                       </div>
-                      <p className="payment-desc font-poetic">
-                        Pay conveniently with cash or UPI directly to the courier upon delivery.
-                      </p>
-                    </div>
-                  </label>
+                    </label>
+                    {paymentMode === 'Cash on Delivery' && (
+                      <div className="payment-subpanel cod-panel">
+                        <div className="cod-reassurance-box">
+                          <CheckCircle2 size={16} className="gold-icon" />
+                          <span>No upfront payment required. Inspect your bespoke package upon arrival.</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Option 2: UPI */}
-                  <label className={`payment-option-card ${paymentMode === 'UPI / QR' ? 'selected' : ''}`}>
-                    <input
-                      type="radio"
-                      name="payment_mode"
-                      value="UPI / QR"
-                      checked={paymentMode === 'UPI / QR'}
-                      onChange={(e) => setPaymentMode(e.target.value)}
-                    />
-                    <div className="payment-option-info">
-                      <div className="payment-title font-royal">
-                        <span>Instant UPI (Google Pay / PhonePe / Paytm / BHIM)</span>
+                  <div className={`payment-option-wrapper ${paymentMode === 'UPI / QR' ? 'selected' : ''}`}>
+                    <label className="payment-option-card">
+                      <input
+                        type="radio"
+                        name="payment_mode"
+                        value="UPI / QR"
+                        checked={paymentMode === 'UPI / QR'}
+                        onChange={(e) => setPaymentMode(e.target.value)}
+                      />
+                      <div className="payment-option-info">
+                        <div className="payment-title font-royal">
+                          <span>Instant UPI (Google Pay / PhonePe / Paytm / BHIM)</span>
+                        </div>
+                        <p className="payment-desc font-poetic">
+                          Scan & pay immediately using your favorite UPI application.
+                        </p>
                       </div>
-                      <p className="payment-desc font-poetic">
-                        Scan & pay immediately using your favorite UPI application.
-                      </p>
-                    </div>
-                  </label>
+                    </label>
+                    {paymentMode === 'UPI / QR' && (
+                      <div className="payment-subpanel upi-panel">
+                        <div className="upi-input-group">
+                          <label className="font-royal">Enter your UPI ID / VPA</label>
+                          <div className="upi-input-wrapper">
+                            <input
+                              type="text"
+                              placeholder="e.g. mobile@upi or username@oksbi"
+                              value={upiId}
+                              onChange={(e) => {
+                                setUpiId(e.target.value);
+                                setUpiVerified(false);
+                              }}
+                              className="checkout-input upi-input"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (upiId.includes('@')) {
+                                  setUpiVerified(true);
+                                } else {
+                                  alert('Please enter a valid UPI ID (e.g. yourname@upi)');
+                                }
+                              }}
+                              className="btn-gold upi-verify-btn font-royal"
+                            >
+                              {upiVerified ? '✓ Verified' : 'Verify'}
+                            </button>
+                          </div>
+                          <div className="upi-presets">
+                            {['@oksbi', '@okhdfcbank', '@paytm', '@ybl'].map((tag) => (
+                              <button
+                                key={tag}
+                                type="button"
+                                onClick={() => {
+                                  const prefix = upiId.split('@')[0] || 'mohera';
+                                  setUpiId(prefix + tag);
+                                  setUpiVerified(true);
+                                }}
+                                className="upi-preset-pill font-royal"
+                              >
+                                {tag}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="upi-qr-box">
+                          <Smartphone size={20} className="gold-icon" />
+                          <span className="font-poetic">
+                            Dynamic QR code will also be presented after confirming to complete instant approval.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Option 3: Credit & Debit Card */}
-                  <label className={`payment-option-card ${paymentMode === 'Credit / Debit Card' ? 'selected' : ''}`}>
-                    <input
-                      type="radio"
-                      name="payment_mode"
-                      value="Credit / Debit Card"
-                      checked={paymentMode === 'Credit / Debit Card'}
-                      onChange={(e) => setPaymentMode(e.target.value)}
-                    />
-                    <div className="payment-option-info">
-                      <div className="payment-title font-royal">
-                        <span>Credit / Debit Card</span>
+                  <div className={`payment-option-wrapper ${paymentMode === 'Credit / Debit Card' ? 'selected' : ''}`}>
+                    <label className="payment-option-card">
+                      <input
+                        type="radio"
+                        name="payment_mode"
+                        value="Credit / Debit Card"
+                        checked={paymentMode === 'Credit / Debit Card'}
+                        onChange={(e) => setPaymentMode(e.target.value)}
+                      />
+                      <div className="payment-option-info">
+                        <div className="payment-title font-royal">
+                          <span>Credit / Debit Card</span>
+                        </div>
+                        <p className="payment-desc font-poetic">
+                          Accepting Visa, MasterCard, RuPay, and American Express with 3D Secure OTP.
+                        </p>
                       </div>
-                      <p className="payment-desc font-poetic">
-                        Accepting Visa, MasterCard, RuPay, and American Express with OTP authentication.
-                      </p>
-                    </div>
-                  </label>
+                    </label>
+                    {paymentMode === 'Credit / Debit Card' && (
+                      <div className="payment-subpanel card-panel">
+                        {/* Luxury Card Graphic */}
+                        <div className="luxury-virtual-card">
+                          <div className="card-top-row">
+                            <span className="card-brand-label font-royal">MOHERA PRIVÉ</span>
+                            <Lock size={14} className="gold-icon" />
+                          </div>
+                          <div className="card-chip-box">
+                            <div className="card-emv-chip" />
+                          </div>
+                          <div className="card-number-display font-royal">
+                            {cardData.number || '•••• •••• •••• ••••'}
+                          </div>
+                          <div className="card-bottom-row">
+                            <div>
+                              <span className="card-meta-lbl">CARDHOLDER</span>
+                              <div className="card-meta-val font-royal">{cardData.name || 'YOUR NAME'}</div>
+                            </div>
+                            <div>
+                              <span className="card-meta-lbl">EXPIRES</span>
+                              <div className="card-meta-val font-royal">{cardData.expiry || 'MM/YY'}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Interactive Card Inputs */}
+                        <div className="form-group">
+                          <label className="font-royal">Card Number</label>
+                          <input
+                            type="text"
+                            placeholder="0000 0000 0000 0000"
+                            maxLength={19}
+                            value={cardData.number}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim().slice(0, 19);
+                              setCardData({ ...cardData, number: val });
+                            }}
+                            className="checkout-input"
+                          />
+                        </div>
+
+                        <div className="form-grid-row">
+                          <div className="form-group">
+                            <label className="font-royal">Cardholder Name</label>
+                            <input
+                              type="text"
+                              placeholder="Name on card"
+                              value={cardData.name}
+                              onChange={(e) => setCardData({ ...cardData, name: e.target.value })}
+                              className="checkout-input"
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label className="font-royal">Expiry Date</label>
+                            <input
+                              type="text"
+                              placeholder="MM/YY"
+                              maxLength={5}
+                              value={cardData.expiry}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '').replace(/^(\d{2})/, '$1/').slice(0, 5);
+                                setCardData({ ...cardData, expiry: val });
+                              }}
+                              className="checkout-input"
+                            />
+                          </div>
+
+                          <div className="form-group">
+                            <label className="font-royal">CVV</label>
+                            <input
+                              type="password"
+                              placeholder="•••"
+                              maxLength={4}
+                              value={cardData.cvv}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                                setCardData({ ...cardData, cvv: val });
+                              }}
+                              className="checkout-input"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Option 4: Net Banking */}
-                  <label className={`payment-option-card ${paymentMode === 'Net Banking' ? 'selected' : ''}`}>
-                    <input
-                      type="radio"
-                      name="payment_mode"
-                      value="Net Banking"
-                      checked={paymentMode === 'Net Banking'}
-                      onChange={(e) => setPaymentMode(e.target.value)}
-                    />
-                    <div className="payment-option-info">
-                      <div className="payment-title font-royal">
-                        <span>Net Banking</span>
+                  <div className={`payment-option-wrapper ${paymentMode === 'Net Banking' ? 'selected' : ''}`}>
+                    <label className="payment-option-card">
+                      <input
+                        type="radio"
+                        name="payment_mode"
+                        value="Net Banking"
+                        checked={paymentMode === 'Net Banking'}
+                        onChange={(e) => setPaymentMode(e.target.value)}
+                      />
+                      <div className="payment-option-info">
+                        <div className="payment-title font-royal">
+                          <span>Net Banking</span>
+                        </div>
+                        <p className="payment-desc font-poetic">
+                          Direct transfer via all major Indian scheduled banks.
+                        </p>
                       </div>
-                      <p className="payment-desc font-poetic">
-                        Direct transfer via all major Indian banks (HDFC, ICICI, SBI, Axis, etc.).
-                      </p>
-                    </div>
-                  </label>
+                    </label>
+                    {paymentMode === 'Net Banking' && (
+                      <div className="payment-subpanel netbanking-panel">
+                        <label className="font-royal" style={{ display: 'block', marginBottom: '8px', fontSize: '0.8rem', color: 'var(--gold-300)' }}>
+                          Select Preferred Bank
+                        </label>
+                        <div className="banks-quick-grid">
+                          {['HDFC Bank', 'State Bank of India', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra'].map((b) => (
+                            <button
+                              key={b}
+                              type="button"
+                              onClick={() => setSelectedBank(b)}
+                              className={`bank-pill font-royal ${selectedBank === b ? 'selected' : ''}`}
+                            >
+                              <Building size={13} className="gold-icon" />
+                              <span>{b}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Selected / Guest Address Preview */}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   MapPin, Plus, Trash2, Edit2, CheckCircle2,
-  ArrowLeft, Home, Building2, Sparkles, AlertCircle, X
+  ArrowLeft, Home, Building2, Sparkles, AlertCircle, X, ShoppingBag
 } from 'lucide-react';
 import { api, getAccessToken } from '../api';
 
@@ -165,14 +165,26 @@ export default function AddressBook({ user, onRequireAuth }) {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenAddModal}
-          className="btn-gold address-add-btn font-royal"
-        >
-          <Plus size={16} />
-          <span>Add New Address</span>
-        </button>
+        <div className="address-header-actions">
+          <button
+            type="button"
+            onClick={() => { window.location.hash = '#/checkout'; }}
+            className="btn-outline-gold font-royal"
+            style={{ padding: '9px 16px', fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+          >
+            <ShoppingBag size={14} />
+            <span>Go to Checkout</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleOpenAddModal}
+            className="btn-gold address-add-btn font-royal"
+          >
+            <Plus size={16} />
+            <span>Add New Address</span>
+          </button>
+        </div>
       </div>
 
       {/* Messages */}

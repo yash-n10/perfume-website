@@ -5101,3 +5101,223 @@
   padding: 40px 20px;
   text-align: center;
 }
+
+/* ==========================================================================
+   INTERACTIVE PAYMENT PAGE & VIRTUAL CARD STYLES
+   ========================================================================== */
+.payment-option-wrapper {
+  background: rgba(22, 15, 23, 0.7);
+  border: 1.5px solid rgba(212, 175, 55, 0.16);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+}
+
+.payment-option-wrapper.selected {
+  border-color: var(--gold-400);
+  background: rgba(30, 20, 32, 0.85);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.12);
+}
+
+.payment-option-wrapper .payment-option-card {
+  border: none;
+  background: transparent;
+  margin-bottom: 0;
+  border-radius: 0;
+}
+
+.payment-subpanel {
+  padding: 16px 20px 22px 20px;
+  border-top: 1px solid rgba(212, 175, 55, 0.18);
+  background: rgba(14, 9, 15, 0.65);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* COD Panel */
+.cod-reassurance-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gold-300);
+  font-size: 0.86rem;
+  background: rgba(212, 175, 55, 0.08);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+/* UPI Panel */
+.upi-input-group label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--gold-300);
+  margin-bottom: 8px;
+  letter-spacing: 0.08em;
+}
+
+.upi-input-wrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.upi-input {
+  flex: 1;
+}
+
+.upi-verify-btn {
+  padding: 8px 18px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.upi-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.upi-preset-pill {
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  color: var(--gold-300);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.upi-preset-pill:hover {
+  background: rgba(212, 175, 55, 0.2);
+  color: #fff;
+  border-color: var(--gold-500);
+}
+
+.upi-qr-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(212, 175, 55, 0.25);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Luxury Virtual Card */
+.luxury-virtual-card {
+  max-width: 380px;
+  margin: 0 auto 20px auto;
+  background: linear-gradient(135deg, #2b1f14 0%, #171109 50%, #3d2b19 100%);
+  border: 1.5px solid var(--gold-500);
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(212, 175, 55, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.luxury-virtual-card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-brand-label {
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: var(--gold-300);
+  font-weight: 700;
+}
+
+.card-chip-box {
+  margin: 14px 0 10px 0;
+}
+
+.card-emv-chip {
+  width: 36px;
+  height: 26px;
+  background: linear-gradient(135deg, #e6c875 0%, #a48232 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.card-number-display {
+  font-size: 1.15rem;
+  letter-spacing: 0.22em;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  margin: 12px 0 16px 0;
+  font-family: monospace, sans-serif;
+}
+
+.card-bottom-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-meta-lbl {
+  display: block;
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  color: var(--gold-400);
+  opacity: 0.8;
+  margin-bottom: 2px;
+}
+
+.card-meta-val {
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  color: #f3f3f3;
+  text-transform: uppercase;
+}
+
+/* Net Banking Grid */
+.banks-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.bank-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(22, 15, 23, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.bank-pill:hover {
+  background: rgba(212, 175, 55, 0.1);
+  color: #fff;
+  border-color: var(--gold-400);
+}
+
+.bank-pill.selected {
+  background: var(--gold-dim);
+  border-color: var(--gold-500);
+  color: var(--gold-300);
+  font-weight: 600;
+}
+
