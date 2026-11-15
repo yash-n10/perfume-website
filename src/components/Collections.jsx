@@ -5,7 +5,7 @@ import { addToGuestCart } from '../utils/cartManager';
 
 const defaultProducts = [
   {
-    id: 'belle',
+    id: 1,
     name: 'Mohera Belle',
     collection: 'Female Collection',
     category: 'female',
@@ -15,7 +15,7 @@ const defaultProducts = [
     image: '/products/belle_poster.jpeg'
   },
   {
-    id: 'elan',
+    id: 2,
     name: 'Mohera Elan',
     collection: 'Female Collection',
     category: 'female',
@@ -25,7 +25,7 @@ const defaultProducts = [
     image: '/products/elan_poster.jpeg'
   },
   {
-    id: 'drive',
+    id: 3,
     name: 'Mohera Drive',
     collection: 'Male Collection',
     category: 'male',
@@ -35,7 +35,7 @@ const defaultProducts = [
     image: '/products/drive_poster.jpeg'
   },
   {
-    id: 'titan',
+    id: 4,
     name: 'Mohera Titan',
     collection: 'Male Collection',
     category: 'male',
@@ -45,7 +45,7 @@ const defaultProducts = [
     image: '/products/titan_poster.jpeg'
   },
   {
-    id: 'luna',
+    id: 5,
     name: 'Mohera Luna',
     collection: 'Unisex Collection',
     category: 'upcoming',
@@ -58,14 +58,14 @@ const defaultProducts = [
 ];
 
 const devinoireProducts = [
-  { name: 'Aphira', price: 2999.00 },
-  { name: 'Ares', price: 2999.00 },
-  { name: 'Athena', price: 2999.00 },
-  { name: 'Hades', price: 2999.00 },
-  { name: 'Hera', price: 2999.00 },
-  { name: 'Nereus', price: 2999.00 },
-  { name: 'Orion', price: 2999.00 },
-  { name: 'Sephora', price: 2999.00 },
+  { id: 6, name: 'Devinoire Aphira', shortName: 'aphira', price: 2999.00 },
+  { id: 7, name: 'Devinoire Ares', shortName: 'ares', price: 2999.00 },
+  { id: 8, name: 'Devinoire Athena', shortName: 'athena', price: 2999.00 },
+  { id: 9, name: 'Devinoire Hades', shortName: 'hades', price: 2999.00 },
+  { id: 10, name: 'Devinoire Hera', shortName: 'hera', price: 2999.00 },
+  { id: 11, name: 'Devinoire Nereus', shortName: 'nereus', price: 2999.00 },
+  { id: 12, name: 'Devinoire Orion', shortName: 'orion', price: 2999.00 },
+  { id: 13, name: 'Devinoire Sephora', shortName: 'sephora', price: 2999.00 },
 ];
 
 export default function Collections({ user, onRequireAuth, onCartUpdated, onOpenCart }) {
@@ -87,26 +87,25 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
       });
   }, []);
 
-  const findProductId = (productName) => {
-    const match = backendProducts.find(
-      (bp) => bp.product_name.toLowerCase() === productName.toLowerCase() ||
-        bp.product_name.toLowerCase().includes(productName.toLowerCase()) ||
-        productName.toLowerCase().includes(bp.product_name.toLowerCase())
-    );
-    return match ? match.id : null;
+  const findProductId = (product) => {
+    const pName = (product.name || '').toLowerCase();
+    if (backendProducts && backendProducts.length > 0) {
+      const match = backendProducts.find((bp) => {
+        const bpName = (bp.product_name || '').toLowerCase();
+        return bpName === pName || bpName.includes(pName) || pName.includes(bpName);
+      });
+      if (match) return match.id;
+    }
+    if (typeof product.id === 'number') {
+      return product.id;
+    }
+    return 1;
   };
 
   const handleAddToCart = async (product) => {
     setAddingId(product.id || product.name);
     try {
-      // Find matching DB ID or fallback to 1
-      let dbId = findProductId(product.name);
-      if (!dbId && backendProducts.length > 0) {
-        dbId = backendProducts[0].id;
-      }
-      if (!dbId) {
-        dbId = 1; // default seed id
-      }
+      const dbId = findProductId(product);
 
       let updatedCart;
       if (!getAccessToken()) {
@@ -116,7 +115,7 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
           product_id: dbId,
           name: product.name,
           price: product.price,
-          image: product.image,
+          image: product.image || '/products/belle_poster.jpeg',
         }, 1);
       } else {
         // Logged in: store in database
@@ -316,10 +315,15 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
                 </div>
 
                 <div className="devinoire-card-body">
-                  <h3 className="devinoire-product-name font-royal">{p.name}</h3>
+                  <h3 className="devinoire-product-name font-royal">{p.name.replace('Devinoire ', '')}</h3>
                   <button
                     type="button"
-                    onClick={() => handleAddToCart({ id: `devinoire-${p.name}`, name: `Devinoire ${p.name}`, price: p.price })}
+                    onClick={() => handleAddToCart({
+                      id: p.id,
+                      name: p.name,
+                      price: p.price,
+                      image: `/products/devinoire/${p.shortName || p.name.toLowerCase().replace('devinoire ', '')}.jpeg`
+                    })}
                     disabled={isAdding}
                     className={`btn-gold devinoire-add-btn font-royal ${isJustAdded ? 'just-added' : ''}`}
                   >
