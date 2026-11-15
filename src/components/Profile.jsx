@@ -407,8 +407,9 @@ export default function Profile({ user, onRequireAuth, initialTab = 'orders' }) 
           )}
 
           {isOrdersLoading ? (
-            <div className="profile-loading-box font-royal gold-gradient-text">
-              Retrieving your luxury fragrance orders...
+            <div className="profile-loading-box font-royal">
+              <span className="profile-spinner"></span>
+              <span>Retrieving your luxury fragrance orders...</span>
             </div>
           ) : orders.length === 0 ? (
             <div className="profile-empty-state luxury-glass">
@@ -585,8 +586,9 @@ export default function Profile({ user, onRequireAuth, initialTab = 'orders' }) 
           )}
 
           {isAddressesLoading ? (
-            <div className="profile-loading-box font-royal gold-gradient-text">
-              Loading your address book...
+            <div className="profile-loading-box font-royal">
+              <span className="profile-spinner"></span>
+              <span>Loading your address book...</span>
             </div>
           ) : addresses.length === 0 ? (
             <div className="profile-empty-state luxury-glass">
@@ -680,8 +682,9 @@ export default function Profile({ user, onRequireAuth, initialTab = 'orders' }) 
           </div>
 
           {isReviewsLoading ? (
-            <div className="profile-loading-box font-royal gold-gradient-text">
-              Loading your fragrance reviews...
+            <div className="profile-loading-box font-royal">
+              <span className="profile-spinner"></span>
+              <span>Loading your fragrance reviews...</span>
             </div>
           ) : myReviews.length === 0 ? (
             <div className="profile-empty-state luxury-glass">
