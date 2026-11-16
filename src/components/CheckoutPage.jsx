@@ -3,7 +3,7 @@ import {
   ArrowLeft, Check, ShieldCheck, MapPin, CreditCard,
   ShoppingBag, Plus, Trash2, CheckCircle2, Download,
   Truck, ArrowRight, Sparkles, AlertCircle, UserCheck,
-  Smartphone, Lock, Building
+  Smartphone, Lock, Building, Home, Building2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api, getAccessToken } from '../api';
@@ -187,11 +187,19 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated, initi
         };
         if (selectedAddressId) {
           payload.address_id = selectedAddressId;
-        } else if (showNewAddressForm) {
+        } else {
+          // If user filled in a new address (or address book was empty), provide it so backend persists it
           payload.address = newAddress;
         }
 
         order = await api.checkout(payload);
+
+        // If user entered a new address, refresh user address book in background
+        if (showNewAddressForm || !selectedAddressId) {
+          api.getAddresses().then((updatedList) => {
+            if (updatedList) setAddresses(updatedList);
+          }).catch(() => {});
+        }
       } else {
         // Guest Checkout
         if (!newAddress.full_name || !newAddress.phone || !newAddress.address_line1 || !newAddress.city || !newAddress.state || !newAddress.pincode) {
@@ -654,21 +662,27 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated, initi
                         />
                       </div>
 
-                      {isLoggedIn && (
-                        <div className="form-group">
-                          <label className="font-royal">Address Label</label>
-                          <select
-                            value={newAddress.label}
-                            onChange={(e) => setNewAddress({ ...newAddress, label: e.target.value })}
-                            className="checkout-input font-royal"
-                          >
-                            <option value="Home">Home</option>
-                            <option value="Office">Office</option>
-                            <option value="Bespoke">Bespoke / Studio</option>
-                            <option value="Other">Other</option>
-                          </select>
+                      <div className="form-group">
+                        <label className="font-royal">Address Label</label>
+                        <div className="address-label-pills">
+                          {[
+                            { label: 'Home', icon: Home },
+                            { label: 'Office', icon: Building2 },
+                            { label: 'Bespoke', icon: Sparkles },
+                            { label: 'Other', icon: MapPin },
+                          ].map(({ label, icon: Icon }) => (
+                            <button
+                              key={label}
+                              type="button"
+                              onClick={() => setNewAddress({ ...newAddress, label })}
+                              className={`address-label-pill-btn font-royal ${newAddress.label === label ? 'active' : ''}`}
+                            >
+                              <Icon size={13} />
+                              <span>{label}</span>
+                            </button>
+                          ))}
                         </div>
-                      )}
+                      </div>
                     </div>
 
                     {isLoggedIn && (

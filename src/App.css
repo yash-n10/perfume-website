@@ -5773,6 +5773,138 @@
   line-height: 1.6;
 }
 
+/* Modal Common Styling (Profile & Reviews) */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(20, 15, 10, 0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 20px;
+  padding: 32px;
+  background: #ffffff !important;
+  border: 1.5px solid var(--gold-border);
+  box-shadow: 0 16px 45px rgba(180, 140, 32, 0.2);
+  position: relative;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(180, 140, 32, 0.2);
+}
+
+.modal-header-title-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-title {
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  color: #1a1208;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin: 0;
+}
+
+.modal-close-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #8a6010 !important;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+  background: rgba(212, 175, 55, 0.15) !important;
+  color: #1a1208 !important;
+  transform: rotate(90deg);
+}
+
+.modal-subtitle {
+  font-size: 0.95rem;
+  color: #6b5c3e;
+  margin-top: -10px;
+  margin-bottom: 18px;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-alert-error {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+  font-size: 0.85rem;
+}
+
+/* Address Label Selector Pills */
+.address-label-pills {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.address-label-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(180, 140, 32, 0.25);
+  background: #ffffff;
+  color: #6b5c3e;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-weight: 700;
+}
+
+.address-label-pill-btn:hover {
+  border-color: var(--gold-500);
+  background: rgba(212, 175, 55, 0.08);
+  color: #8a6010;
+}
+
+.address-label-pill-btn.active {
+  border-color: var(--gold-500);
+  background: var(--gradient-gold);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(180, 140, 32, 0.3);
+}
+
 /* Review Modal */
 .review-modal-card {
   max-width: 540px;

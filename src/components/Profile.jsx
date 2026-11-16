@@ -980,17 +980,25 @@ export default function Profile({ user, onRequireAuth, initialTab = 'orders' }) 
                   />
                 </div>
                 <div className="form-group">
-                  <label className="font-royal">Label</label>
-                  <select
-                    value={addressFormData.label}
-                    onChange={(e) => setAddressFormData({ ...addressFormData, label: e.target.value })}
-                    className="checkout-input font-royal"
-                  >
-                    <option value="Home">Home</option>
-                    <option value="Office">Office</option>
-                    <option value="Bespoke">Bespoke / Studio</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <label className="font-royal">Address Label</label>
+                  <div className="address-label-pills">
+                    {[
+                      { label: 'Home', icon: Home },
+                      { label: 'Office', icon: Building2 },
+                      { label: 'Bespoke', icon: Sparkles },
+                      { label: 'Other', icon: MapPin },
+                    ].map(({ label, icon: Icon }) => (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => setAddressFormData({ ...addressFormData, label })}
+                        className={`address-label-pill-btn font-royal ${addressFormData.label === label ? 'active' : ''}`}
+                      >
+                        <Icon size={13} />
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
