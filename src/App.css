@@ -83,6 +83,14 @@
   justify-content: space-between;
 }
 
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
 .brand-wordmark {
   text-decoration: none;
   display: flex;
@@ -2621,10 +2629,6 @@
     letter-spacing: 0.18em;
   }
 
-  .nav-enquiry-btn {
-    display: none;
-  }
-
   .luxury-live-badge {
     padding: 6px 14px;
     gap: 8px;
@@ -2928,7 +2932,8 @@
   }
 
   .auth-input {
-    font-size: 16px; /* Prevents auto-zoom in iOS Safari */
+    font-size: 16px;
+    /* Prevents auto-zoom in iOS Safari */
     padding: 10px 36px 10px 36px;
     border-radius: 8px;
   }
@@ -3057,6 +3062,11 @@
   justify-content: center;
   cursor: pointer;
   transition: var(--transition-smooth);
+}
+
+.nav-cart-btn svg {
+  display: block;
+  flex: 0 0 auto;
 }
 
 .nav-cart-btn:hover {
@@ -3281,6 +3291,7 @@
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
@@ -5090,7 +5101,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .checkout-empty-cart {
@@ -5117,6 +5130,26 @@
   border-color: var(--gold-400);
   background: rgba(30, 20, 32, 0.85);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.12);
+}
+
+.payment-option-disabled {
+  opacity: 0.72;
+}
+
+.payment-option-disabled .payment-option-card,
+.payment-option-disabled input[type="radio"] {
+  cursor: not-allowed;
+}
+
+.payment-coming-soon-pill {
+  padding: 3px 8px;
+  border: 1px solid rgba(180, 140, 32, 0.35);
+  border-radius: 999px;
+  color: var(--gold-400);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .payment-option-wrapper .payment-option-card {
@@ -5543,7 +5576,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .profile-empty-state {
@@ -6040,5 +6075,3 @@
     justify-content: space-between;
   }
 }
-
-

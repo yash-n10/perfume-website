@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   ArrowUpRight, Menu, X, User, LogOut,
-  ShoppingBag, Package, MapPin, ChevronDown, CreditCard
+  ShoppingCart, ShoppingBag, Package, MapPin, ChevronDown, CreditCard
 } from 'lucide-react';
 import logo from '/logo_white.png';
 import AuthModal from './AuthModal';
@@ -189,10 +189,10 @@ export default function Navbar({
               type="button"
               onClick={onOpenCart}
               className="nav-cart-btn"
-              aria-label="Open Cart"
+              aria-label={`Open cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
               title="View Cart"
             >
-              <ShoppingBag size={20} className="gold-icon" />
+              <ShoppingCart size={20} className="gold-icon" aria-hidden="true" />
               {cartCount > 0 && (
                 <span className="nav-cart-badge font-royal">
                   {cartCount > 99 ? '99+' : cartCount}
