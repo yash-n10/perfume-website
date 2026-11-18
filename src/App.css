@@ -5127,13 +5127,14 @@
 }
 
 .payment-option-wrapper.selected {
-  border-color: var(--gold-400);
-  background: rgba(30, 20, 32, 0.85);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.12);
+  border-color: var(--gold-500);
+  background: #fffdf7;
+  box-shadow: 0 4px 18px rgba(132, 95, 18, 0.12);
 }
 
 .payment-option-disabled {
-  opacity: 0.72;
+  border-color: #ded7c9;
+  background: #f4f1eb;
 }
 
 .payment-option-disabled .payment-option-card,
@@ -5141,11 +5142,20 @@
   cursor: not-allowed;
 }
 
+.payment-option-disabled .payment-title {
+  color: #5f584d;
+}
+
+.payment-option-disabled .payment-desc {
+  color: #756d61;
+}
+
 .payment-coming-soon-pill {
   padding: 3px 8px;
-  border: 1px solid rgba(180, 140, 32, 0.35);
+  border: 1px solid #d5c7a6;
   border-radius: 999px;
-  color: var(--gold-400);
+  background: #ebe4d5;
+  color: #74591c;
   font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -5161,8 +5171,8 @@
 
 .payment-subpanel {
   padding: 16px 20px 22px 20px;
-  border-top: 1px solid rgba(212, 175, 55, 0.18);
-  background: rgba(14, 9, 15, 0.65);
+  border-top: 1px solid rgba(180, 140, 32, 0.2);
+  background: #faf6ed;
   animation: fadeIn 0.3s ease-out;
 }
 
