@@ -305,7 +305,7 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
               <article key={p.name} className="devinoire-product-card">
                 <div className="devinoire-img-wrap">
                   <img
-                    src={`/products/devinoire/${p.name.toLowerCase()}.jpeg`}
+                    src={`/products/devinoire/${p.shortName.toLowerCase()}.jpeg`}
                     alt={`Devinoire ${p.name} perfume`}
                     className="devinoire-product-image"
                     loading="lazy"
