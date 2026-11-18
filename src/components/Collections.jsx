@@ -87,26 +87,27 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
       });
   }, []);
 
-  const findProductId = (product) => {
-    // If product already has a valid numeric ID, use it directly (1-13)
-    if (typeof product.id === 'number' && product.id > 0) {
-      return product.id;
-    }
-    const pName = (product.name || '').toLowerCase();
-    if (backendProducts && backendProducts.length > 0) {
-      const match = backendProducts.find((bp) => {
-        const bpName = (bp.product_name || '').toLowerCase();
-        return bpName === pName || bpName.includes(pName) || pName.includes(bpName);
-      });
-      if (match) return match.id;
-    }
-    return product.id || 1;
+  const findBackendProduct = (product) => {
+    const productName = (product.name || '').trim().toLowerCase();
+    return backendProducts.find(
+      (backendProduct) => backendProduct.product_name?.trim().toLowerCase() === productName
+    );
+  };
+
+  const getProductId = (product) => {
+    return findBackendProduct(product)?.id || product.id || 1;
+  };
+
+  const getProductPrice = (product) => {
+    const databasePrice = Number(findBackendProduct(product)?.price);
+    return Number.isFinite(databasePrice) ? databasePrice : product.price;
   };
 
   const handleAddToCart = async (product) => {
     setAddingId(product.id || product.name);
     try {
-      const dbId = findProductId(product);
+      const dbId = getProductId(product);
+      const price = getProductPrice(product);
 
       let updatedCart;
       if (!getAccessToken()) {
@@ -115,7 +116,7 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
           id: dbId,
           product_id: dbId,
           name: product.name,
-          price: product.price,
+          price,
           image: product.image || '/products/belle_poster.jpeg',
         }, 1);
       } else {
@@ -191,6 +192,7 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
             const isAdding = addingId === (product.id || product.name);
             const isJustAdded = justAddedId === (product.id || product.name);
             const isAvailable = product.category !== 'upcoming';
+            const price = getProductPrice(product);
 
             return (
               <div key={product.id} className="product-card luxury-glass">
@@ -206,9 +208,9 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
                     {product.collection}
                   </div>
 
-                  {product.price && (
+                  {price && (
                     <div className="product-price-badge font-royal">
-                      ₹{product.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      ₹{price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </div>
                   )}
                 </div>
@@ -300,6 +302,7 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
           {devinoireProducts.map((p) => {
             const isAdding = addingId === `devinoire-${p.name}`;
             const isJustAdded = justAddedId === `devinoire-${p.name}`;
+            const price = getProductPrice(p);
 
             return (
               <article key={p.name} className="devinoire-product-card">
@@ -311,7 +314,7 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
                     loading="lazy"
                   />
                   <div className="devinoire-price-tag font-royal">
-                    ₹{p.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    ₹{price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </div>
                 </div>
 
@@ -322,7 +325,7 @@ export default function Collections({ user, onRequireAuth, onCartUpdated, onOpen
                     onClick={() => handleAddToCart({
                       id: p.id,
                       name: p.name,
-                      price: p.price,
+                      price,
                       image: `/products/devinoire/${p.shortName || p.name.toLowerCase().replace('devinoire ', '')}.jpeg`
                     })}
                     disabled={isAdding}
