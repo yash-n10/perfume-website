@@ -29,7 +29,7 @@ function getBase64ImageFromURL(url) {
 /**
  * Download a formatted Tax Invoice PDF with MOHERA branding, GST number, and itemized table
  */
-export async function downloadInvoicePDF(order, gstNumber = '27AABCM1234F1Z1') {
+export async function downloadInvoicePDF(order, gstNumber = '20BAFPM0160B1ZO') {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -292,7 +292,7 @@ export async function downloadInvoicePDF(order, gstNumber = '27AABCM1234F1Z1') {
 /**
  * Open printable invoice window for direct browser printing
  */
-export function printInvoice(order, gstNumber = '27AABCM1234F1Z1') {
+export function printInvoice(order, gstNumber = '20BAFPM0160B1ZO') {
   const printWindow = window.open('', '_blank');
   if (!printWindow) return;
 

@@ -494,7 +494,7 @@ export default function AdminPanel() {
     if (!targetOrder) return;
     setPdfGenerating(true);
     try {
-      await downloadInvoicePDF(targetOrder, targetOrder.gst_number || '27AABCM1234F1Z1');
+      await downloadInvoicePDF(targetOrder, targetOrder.gst_number || '20BAFPM0160B1ZO');
     } catch (err) {
       alert(`Could not generate PDF: ${err.message}`);
     } finally {
@@ -863,7 +863,7 @@ export default function AdminPanel() {
                                     <button
                                       type="button"
                                       className="btn-order-action btn-print"
-                                      onClick={() => printInvoice(order, order.gst_number || '27AABCM1234F1Z1')}
+                                      onClick={() => printInvoice(order, order.gst_number || '20BAFPM0160B1ZO')}
                                       title="Print Tax Invoice"
                                     >
                                       <Printer size={13} />
@@ -918,7 +918,7 @@ export default function AdminPanel() {
                                       </div>
                                       <div className="expanded-footer-info">
                                         <span>Delivery Address: <strong>{order.address || 'In-Store Counter'}</strong></span>
-                                        <span>GSTIN: <strong>{order.gst_number || '27AABCM1234F1Z1'}</strong></span>
+                                        <span>GSTIN: <strong>{order.gst_number || '20BAFPM0160B1ZO'}</strong></span>
                                       </div>
                                     </div>
                                   </td>
@@ -986,7 +986,7 @@ export default function AdminPanel() {
                         <button
                           type="button"
                           className="btn-bill-print font-royal"
-                          onClick={() => printInvoice(lastCreatedOrder, lastCreatedOrder.gst_number || '27AABCM1234F1Z1')}
+                          onClick={() => printInvoice(lastCreatedOrder, lastCreatedOrder.gst_number || '20BAFPM0160B1ZO')}
                         >
                           <Printer size={16} />
                           <span>Print Bill</span>
