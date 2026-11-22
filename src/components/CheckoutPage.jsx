@@ -879,7 +879,7 @@ export default function CheckoutPage({ user, onRequireAuth, onCartUpdated, initi
                 </div>
                 <div className="perk-item">
                   <Check size={14} className="gold-icon" />
-                  <span>Complimentary Luxury Velvet Pouch</span>
+                  <span>Made in India</span>
                 </div>
                 <div className="perk-item">
                   <Check size={14} className="gold-icon" />
